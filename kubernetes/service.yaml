@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sptc-application-service
+  namespace: sptc-application
+  labels:
+    app: sptc-application
+    component: application
+  annotations:
+    description: "Service for SPTC Application RDP access"
+spec:
+  type: LoadBalancer
+  selector:
+    app: sptc-application
+  ports:
+    - name: rdp
+      port: 3389
+      targetPort: 3389
+      protocol: TCP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800

@@ -7,19 +7,26 @@ namespace SPTC_APPLICATION.Objects
 {
     public class EventLogger
     {
-        private static readonly string LogFilePath = "Logs\\log.txt";
+        private static readonly string LogFilePath = Environment.GetEnvironmentVariable("LOG_PATH") ?? "Logs\\log.txt";
         private static readonly int MaxLines = 10000;
+        private static readonly bool UseConsoleLogging = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("USE_CONSOLE_LOGGING"));
 
         public static void Post(string message)
         {
-            string logEntry = $"{DateTime.Now:ddd MMM-dd HH:mm} :: {message}{Environment.NewLine}";
+            string logEntry = $"{DateTime.Now:ddd MMM-dd HH:mm} :: {message}";
+
+            if (UseConsoleLogging)
+            {
+                Console.WriteLine(logEntry);
+                return;
+            }
 
             try
             {
                 EnsureLogFileExists();
 
                 string currentLogContents = File.ReadAllText(LogFilePath);
-                string updatedLogContents = logEntry + currentLogContents;
+                string updatedLogContents = logEntry + Environment.NewLine + currentLogContents;
 
                 if (updatedLogContents.CountLines() > MaxLines)
                 {
@@ -31,7 +38,7 @@ namespace SPTC_APPLICATION.Objects
             }
             catch (Exception ex)
             {
-                ControlWindow.ShowDialog("Error writing to log file", ex.Message);
+                Console.Error.WriteLine($"Error writing to log file: {ex.Message}");
             }
         }
 
@@ -46,7 +53,7 @@ namespace SPTC_APPLICATION.Objects
                 }
                 catch (Exception ex)
                 {
-                    ControlWindow.ShowDialog("Error creating log file", ex.Message);
+                    Console.Error.WriteLine($"Error creating log file: {ex.Message}");
                 }
             }
         }

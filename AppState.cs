@@ -14,13 +14,13 @@ namespace SPTC_APPLICATION
     public static class AppState
     {
         //SAVED EXTERNALLY
-        public static string APPSTATE_PATH = "Config\\AppState.json";
-        public static string DEFAULT_PASSWORD = "Admin1234";
-        public static string DEFAULT_ADDRESSLINE2 = "Sapang Palay San Jose Del Monte, Bulacan";
-        public static string EXPIRATION_DATE = "2023 - 2024";
-        public static string CHAIRMAN = "ROLLY M. LABINDAO";
-        public static string REGISTRATION_NO = "9520-03006397";
-        public static double PRINT_AJUSTMENTS = 24.67712;
+        public static string APPSTATE_PATH = Environment.GetEnvironmentVariable("CONFIG_PATH") ?? "Config\\AppState.json";
+        public static string DEFAULT_PASSWORD = Environment.GetEnvironmentVariable("DEFAULT_PASSWORD") ?? "Admin1234";
+        public static string DEFAULT_ADDRESSLINE2 = Environment.GetEnvironmentVariable("DEFAULT_ADDRESSLINE2") ?? "Sapang Palay San Jose Del Monte, Bulacan";
+        public static string EXPIRATION_DATE = Environment.GetEnvironmentVariable("EXPIRATION_DATE") ?? "2023 - 2024";
+        public static string CHAIRMAN = Environment.GetEnvironmentVariable("CHAIRMAN") ?? "ROLLY M. LABINDAO";
+        public static string REGISTRATION_NO = Environment.GetEnvironmentVariable("REGISTRATION_NO") ?? "9520-03006397";
+        public static double PRINT_AJUSTMENTS = double.TryParse(Environment.GetEnvironmentVariable("PRINT_ADJUSTMENTS"), out var adj) ? adj : 24.67712;
 
 
 

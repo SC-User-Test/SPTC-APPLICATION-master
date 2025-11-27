@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  sptc-application:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sptc-application:latest
+    container_name: sptc-application
+    hostname: sptc-app
+    
+    # Environment variables
+    environment:
+      - DB_HOST=${DB_HOST:-mysql-server}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_NAME=${DB_NAME:-dtb_sptc}
+      - DB_USER=${DB_USER:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-}
+    
+    # Port mappings (RDP for Windows container access)
+    ports:
+      - "3389:3389"
+    
+    # Volume mounts for configuration and data persistence
+    volumes:
+      - ./config:/app/config:ro
+      - ./logs:/app/logs
+      - app-data:/app/data
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Networks
+    networks:
+      - app-network
+    
+    # Note: This is a WPF desktop application
+    # Requires Windows containers and interactive session
+    # External MySQL database connection required
+
+volumes:
+  app-data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge

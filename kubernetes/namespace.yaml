@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sptc-application
+  labels:
+    name: sptc-application
+    app: sptc-application
+    environment: production
+    managed-by: kubectl
+  annotations:
+    description: "Namespace for SPTC Application - WPF Desktop Application"

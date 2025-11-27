@@ -1,0 +1,50 @@
+# Note: Ingress is not applicable for WPF Desktop Application
+# WPF applications use RDP (port 3389) for access, not HTTP/HTTPS
+# Use the LoadBalancer service instead for external access
+#
+# If you need to expose the application via ALB, you would need to:
+# 1. Convert the application to a web service (ASP.NET Web API)
+# 2. Remove WPF UI components
+# 3. Implement REST endpoints
+#
+# For now, access the application via:
+# kubectl get svc sptc-application-service -n sptc-application
+# Use the EXTERNAL-IP from the LoadBalancer service
+# Connect via RDP: mstsc /v:<EXTERNAL-IP>:3389
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sptc-application-access-info
+  namespace: sptc-application
+  labels:
+    app: sptc-application
+data:
+  access-instructions: |
+    SPTC Application Access Instructions
+    ====================================
+    
+    This is a WPF Desktop Application running in Windows containers.
+    
+    To access the application:
+    
+    1. Get the LoadBalancer external IP:
+       kubectl get svc sptc-application-service -n sptc-application
+    
+    2. Connect via Remote Desktop:
+       - Windows: Use Remote Desktop Connection (mstsc)
+       - Mac: Use Microsoft Remote Desktop from App Store
+       - Linux: Use Remmina or rdesktop
+    
+    3. Connection details:
+       - Host: <EXTERNAL-IP from step 1>
+       - Port: 3389
+       - Username: ContainerUser
+       - Password: <Contact administrator>
+    
+    4. Once connected, launch the application:
+       C:\app\SPTC APPLICATION.exe
+    
+    Note: This architecture is not typical for cloud deployment.
+    Consider modernizing to a web-based architecture for better
+    scalability and cloud-native features.

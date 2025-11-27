@@ -1,0 +1,161 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sptc-application
+  namespace: sptc-application
+  labels:
+    app: sptc-application
+    version: v1.0.0
+    component: application
+    managed-by: kubectl
+  annotations:
+    description: "SPTC Application Deployment - .NET Framework 4.8 WPF Desktop"
+    kubernetes.io/change-cause: "Initial deployment"
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: sptc-application
+  template:
+    metadata:
+      labels:
+        app: sptc-application
+        version: v1.0.0
+        component: application
+      annotations:
+        prometheus.io/scrape: "false"
+        app.version: "1.0.0"
+    spec:
+      # Windows node selector (required for .NET Framework)
+      nodeSelector:
+        kubernetes.io/os: windows
+      
+      # Tolerations for Windows nodes
+      tolerations:
+        - key: "os"
+          operator: "Equal"
+          value: "windows"
+          effect: "NoSchedule"
+      
+      containers:
+        - name: sptc-application
+          image: "{{IMAGE_URI}}"
+          imagePullPolicy: Always
+          
+          # Ports
+          ports:
+            - name: rdp
+              containerPort: 3389
+              protocol: TCP
+          
+          # Environment variables
+          env:
+            - name: DB_HOST
+              value: "{{DB_HOST}}"
+            - name: DB_PORT
+              value: "{{DB_PORT}}"
+            - name: DB_NAME
+              value: "{{DB_NAME}}"
+            - name: DB_USER
+              value: "{{DB_USER}}"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sptc-application-secrets
+                  key: db-password
+                  optional: true
+          
+          # Resource limits (Windows containers require more resources)
+          resources:
+            requests:
+              cpu: "1000m"
+              memory: "2Gi"
+            limits:
+              cpu: "2000m"
+              memory: "4Gi"
+          
+          # Volume mounts
+          volumeMounts:
+            - name: config
+              mountPath: C:\app\config
+              readOnly: true
+            - name: logs
+              mountPath: C:\app\logs
+            - name: app-data
+              mountPath: C:\app\data
+          
+          # Note: Health checks disabled for WPF desktop application
+          # WPF apps require interactive sessions and cannot be health-checked via HTTP
+      
+      # Volumes
+      volumes:
+        - name: config
+          configMap:
+            name: sptc-application-config
+            optional: true
+        - name: logs
+          emptyDir: {}
+        - name: app-data
+          persistentVolumeClaim:
+            claimName: sptc-application-pvc
+      
+      # DNS configuration
+      dnsPolicy: ClusterFirst
+      
+      # Restart policy
+      restartPolicy: Always
+      
+      # Security context (Windows)
+      securityContext:
+        windowsOptions:
+          runAsUserName: "ContainerUser"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sptc-application-pvc
+  namespace: sptc-application
+  labels:
+    app: sptc-application
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: gp3
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sptc-application-secrets
+  namespace: sptc-application
+  labels:
+    app: sptc-application
+type: Opaque
+stringData:
+  db-password: "{{DB_PASSWORD}}"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sptc-application-config
+  namespace: sptc-application
+  labels:
+    app: sptc-application
+data:
+  app.config: |
+    <?xml version="1.0" encoding="utf-8"?>
+    <configuration>
+      <appSettings>
+        <add key="Environment" value="Production" />
+      </appSettings>
+    </configuration>

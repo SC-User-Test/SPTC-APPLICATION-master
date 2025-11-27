@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using SPTC_APPLICATION.Database;
@@ -13,11 +14,11 @@ namespace SPTC_APPLICATION.Objects
         // START UP INITIALIZATION
         public static async void StartInitialization(Window window, ProgressBar progressBar, TextBox log)
         {
-            string host = Settings.Default.Host;
-            string port = Settings.Default.Port;
-            string database = Settings.Default.Database;
-            string username = Settings.Default.Username;
-            string password = Settings.Default.Password;
+            string host = Environment.GetEnvironmentVariable("DB_HOST") ?? Settings.Default.Host;
+            string port = Environment.GetEnvironmentVariable("DB_PORT") ?? Settings.Default.Port;
+            string database = Environment.GetEnvironmentVariable("DB_NAME") ?? Settings.Default.Database;
+            string username = Environment.GetEnvironmentVariable("DB_USER") ?? Settings.Default.Username;
+            string password = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? Settings.Default.Password;
             AppState.LoadFromJson();
             AppState.SaveToJson();
 
@@ -91,11 +92,11 @@ namespace SPTC_APPLICATION.Objects
 
         private static void UpdateSettingsFromDefault(ref string host, ref string port, ref string database, ref string username, ref string password)
         {
-            host = Settings.Default.Host;
-            port = Settings.Default.Port;
-            database = Settings.Default.Database;
-            username = Settings.Default.Username;
-            password = Settings.Default.Password;
+            host = Environment.GetEnvironmentVariable("DB_HOST") ?? Settings.Default.Host;
+            port = Environment.GetEnvironmentVariable("DB_PORT") ?? Settings.Default.Port;
+            database = Environment.GetEnvironmentVariable("DB_NAME") ?? Settings.Default.Database;
+            username = Environment.GetEnvironmentVariable("DB_USER") ?? Settings.Default.Username;
+            password = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? Settings.Default.Password;
         }
 
         private static DatabaseConfigInput GetDatabaseConfigInputWindow(string host, string port, string database, string username, string password)
