@@ -1,0 +1,120 @@
+# =============================================================================
+# .dockerignore — SPTC APPLICATION
+# Rule ID  : cz-dotnet-1040
+# Rule Name: Unoptimized Web Forms Container Image Size
+#
+# Purpose: Exclude unnecessary files from the Docker build context sent to the
+#          Docker daemon. This prevents source code, PDB debug symbols, temp
+#          files, IDE artifacts, and local build outputs from being included in
+#          the container image, reducing both build context transfer time and
+#          final image size on AKS Linux node pools.
+#
+# Addresses original SPTC APPLICATION.csproj occurrences:
+#   - Line 37: <DebugSymbols>true</DebugSymbols> (Debug|AnyCPU) — PDB bloat
+#   - Line 56: <DebugSymbols>true</DebugSymbols> (Debug|x86)    — PDB bloat
+# =============================================================================
+
+# ── Build output directories ──────────────────────────────────────────────────
+bin/
+obj/
+**/bin/
+**/obj/
+
+# ── PDB debug symbol files ────────────────────────────────────────────────────
+**/*.pdb
+
+# ── SQL schema scripts ────────────────────────────────────────────────────────
+**/*.sql
+
+# ── Visual Studio / IDE artefacts ─────────────────────────────────────────────
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+.idea/
+*.DotSettings
+*.DotSettings.user
+
+# ── NuGet package cache ───────────────────────────────────────────────────────
+packages/
+*.nupkg
+*.snupkg
+
+# ── Temporary and log files ───────────────────────────────────────────────────
+*.tmp
+*.temp
+*.log
+*.cache
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ── OS-generated files ────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# ── Git version control ───────────────────────────────────────────────────────
+.git/
+.gitignore
+.gitattributes
+
+# ── Docker files themselves ───────────────────────────────────────────────────
+Dockerfile
+Dockerfile.*
+docker-compose*.yml
+docker-compose*.yaml
+.dockerignore
+
+# ── CI/CD and deployment configuration ───────────────────────────────────────
+.github/
+.gitlab-ci.yml
+azure-pipelines.yml
+Jenkinsfile
+*.tfvars
+*.tfstate
+*.tfstate.backup
+terraform/
+k8s/
+kubernetes/
+helm/
+scripts/
+docs/
+
+# ── Test projects and test output ─────────────────────────────────────────────
+**/*Tests*/
+**/*Test*/
+**/TestResults/
+**/*.Tests.csproj
+
+# ── Documentation ─────────────────────────────────────────────────────────────
+README.md
+CHANGELOG.md
+LICENSE
+docs/
+
+# ── ClickOnce / publish artefacts ────────────────────────────────────────────
+publish/
+*.application
+*.manifest
+*.pfx
+*_TemporaryKey.pfx
+
+# ── XAML / WPF view files ─────────────────────────────────────────────────────
+**/*.xaml
+**/*.xaml.cs
+
+# ── Windows-specific resource files ──────────────────────────────────────────
+*.ico
+*.resx
+*.Designer.cs
+Properties/
+
+# ── App.config (replaced by appsettings.json / environment variables) ─────────
+App.config
+packages.config

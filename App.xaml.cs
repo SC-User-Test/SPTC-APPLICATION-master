@@ -13,6 +13,7 @@ namespace SPTC_APPLICATION
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            HealthCheckService.Start();
             IncrementOpenWindowCount();
         }
 
@@ -23,6 +24,7 @@ namespace SPTC_APPLICATION
             if (openWindowCount <= 0)
             {
                 EventLogger.Post("Main :: Application Closed");
+                HealthCheckService.Stop();
                 AppState.SaveToJson();
             }
         }

@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using MySql.Data.MySqlClient;
 using SPTC_APPLICATION.Objects;
-using SPTC_APPLICATION.View;
 
 namespace SPTC_APPLICATION.Database
 {
@@ -11,7 +10,7 @@ namespace SPTC_APPLICATION.Database
     /*
      all static class
     Login(username password) for Employees only
-    await Retrieve.GetData<object>() this is the main functionality of the Retrieve, it will retrieve from dtabase whatever (tablename, selectquery, wherequery, mysqlparameters) inputted
+    await Retrieve.GetData<object>() this is the main functionality of the Retrieve, it will retrieve from database whatever (tablename, selectquery, wherequery, mysqlparameters) inputted
     make sure that every <object has the receiver constructor like this
     public object(MySqlReader reader)
     {
@@ -26,17 +25,14 @@ namespace SPTC_APPLICATION.Database
      */
     public class Retrieve
     {
-        private static Employee ExecuteQueryAsync(string query, params MySqlParameter[] parameters)
+        private static Employee? ExecuteQueryAsync(string query, params MySqlParameter[] parameters)
         {
-            List<object[]> rows = new List<object[]>();
-
             using (MySqlConnection connection = DatabaseConnection.GetConnection())
             {
                 connection.Open();
 
                 MySqlCommand command = new MySqlCommand(query, connection);
                 command.Parameters.AddRange(parameters);
-
 
                 using (MySqlDataReader reader = command.ExecuteReader())
                 {
@@ -54,42 +50,31 @@ namespace SPTC_APPLICATION.Database
         {
             try
             {
-                string query = RequestQuery.LOGIN_EMPLOYEE;
                 MySqlParameter usernameParam = new MySqlParameter("titleParam", username);
                 MySqlParameter passwordParam = new MySqlParameter("passwordParam", RequestQuery.Protect(password));
 
-                Employee employee = ExecuteQueryAsync(RequestQuery.LOGIN_EMPLOYEE, usernameParam, passwordParam);
+                Employee? employee = ExecuteQueryAsync(RequestQuery.LOGIN_EMPLOYEE, usernameParam, passwordParam);
                 if (employee != null)
                 {
                     return employee;
                 }
                 else
                 {
-                    return ControlWindow.ShowDialog("Wrong Password", "Username and Password not Match.", Icons.ERROR);
+                    EventLogger.Post($"DTB :: Login failed for user: {username}");
+                    return "LOGIN_FAILED";
                 }
             }
             catch (MySqlException ex)
             {
-                return ControlWindow.ShowDialog("TRY AGAIN", "Exception Occurred: \n" + ex.Message, Icons.ERROR);
+                EventLogger.Post($"DTB :: Login exception: {ex.Message}");
+                return "EXCEPTION";
             }
         }
-
-        /* private static async Task<object?> GetFieldValueAsync(MySqlDataReader reader, int index)
-         {
-             if (await reader.IsDBNullAsync(index))
-             {
-                 return null;
-             }
-             else
-             {
-                 return await reader.GetFieldValueAsync<object>(index);
-             }
-         }*/
 
         public static List<T> GetData<T>(string tableName, string selectQuery, string whereQuery, params MySqlParameter[] parameters)
         {
             Type type = typeof(T);
-            ConstructorInfo constructor = type.GetConstructor(Type.EmptyTypes);
+            ConstructorInfo? constructor = type.GetConstructor(Type.EmptyTypes);
             List<T> results = new List<T>();
             try
             {
@@ -119,7 +104,7 @@ namespace SPTC_APPLICATION.Database
                         }
                         else
                         {
-                            results.Add(default(T));
+                            results.Add(default(T)!);
                         }
                     }
 
@@ -138,7 +123,7 @@ namespace SPTC_APPLICATION.Database
                     }
                     else
                     {
-                        results.Add(default(T));
+                        results.Add(default(T)!);
                     }
                 }
 
@@ -149,8 +134,8 @@ namespace SPTC_APPLICATION.Database
         private static T ReadData<T>(MySqlDataReader reader)
         {
             Type type = typeof(T);
-            ConstructorInfo readerConstructor = type.GetConstructor(new[] { typeof(MySqlDataReader) });
-            ConstructorInfo emptyConstructor = type.GetConstructor(Type.EmptyTypes);
+            ConstructorInfo? readerConstructor = type.GetConstructor(new[] { typeof(MySqlDataReader) });
+            ConstructorInfo? emptyConstructor = type.GetConstructor(Type.EmptyTypes);
 
             if (readerConstructor != null)
             {
@@ -170,7 +155,7 @@ namespace SPTC_APPLICATION.Database
                 return (T)emptyConstructor.Invoke(null);
             }
 
-            return default(T);
+            return default(T)!;
         }
 
 
@@ -179,16 +164,13 @@ namespace SPTC_APPLICATION.Database
             try
             {
                 int ordinal = reader.GetOrdinal(columnName);
-                return reader.IsDBNull(ordinal) ? default(T) : reader.GetFieldValue<T>(ordinal);
+                return reader.IsDBNull(ordinal) ? default(T)! : reader.GetFieldValue<T>(ordinal);
             }
             catch (Exception ex)
             {
                 EventLogger.Post($"ERR :: Reader<{typeof(T)}>(columnName) {ex.Message}");
-                return default(T);
+                return default(T)!;
             }
         }
-
-
-
     }
 }

@@ -1,7 +1,5 @@
-﻿using System.IO;
+using System.IO;
 using System.Linq;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using MySql.Data.MySqlClient;
 using SPTC_APPLICATION.Database;
 
@@ -37,11 +35,11 @@ namespace SPTC_APPLICATION.Objects
     public class Name
     {
         public int id { get; private set; }
-        public string prefix;
-        public string firstname;
-        public string middlename;
-        public string lastname;
-        public string suffix;
+        public string? prefix;
+        public string? firstname;
+        public string? middlename;
+        public string? lastname;
+        public string? suffix;
         public string wholename
         {
             get
@@ -65,7 +63,7 @@ namespace SPTC_APPLICATION.Objects
             name = new Upsert(Table.NAME, -1);
         }
 
-        public Name(string prefix, string firstname, string middlename, string lastname, string suffix)
+        public Name(string? prefix, string? firstname, string? middlename, string? lastname, string? suffix)
         {
             this.prefix = prefix;
             this.firstname = firstname;
@@ -77,7 +75,7 @@ namespace SPTC_APPLICATION.Objects
 
         public Name(MySqlDataReader reader)
         {
-            name = null;
+            name = null!;
             this.id = Retrieve.GetValueOrDefault<int>(reader, Field.ID);
             this.prefix = Retrieve.GetValueOrDefault<string>(reader, Field.PREFIX);
             this.firstname = Retrieve.GetValueOrDefault<string>(reader, Field.FIRSTNAME);
@@ -92,11 +90,11 @@ namespace SPTC_APPLICATION.Objects
             {
                 name = new Upsert(Table.NAME, id);
             }
-            name.Insert("prefix", prefix);
-            name.Insert("first_name", firstname);
-            name.Insert("middle_name", middlename);
-            name.Insert("last_name", lastname);
-            name.Insert("suffix", suffix);
+            name.Insert("prefix", prefix!);
+            name.Insert("first_name", firstname!);
+            name.Insert("middle_name", middlename!);
+            name.Insert("last_name", lastname!);
+            name.Insert("suffix", suffix!);
             name.Save();
             id = name.id;
 
@@ -124,17 +122,17 @@ namespace SPTC_APPLICATION.Objects
     public class Address
     {
         public int id { get; private set; }
-        public string houseNo;
-        public string streetname;
-        public string barangay;
+        public string? houseNo;
+        public string? streetname;
+        public string? barangay;
 
-        public string city;
-        public string province;
-        public string zipcode;
-        public string country;
+        public string? city;
+        public string? province;
+        public string? zipcode;
+        public string? country;
 
-        public string addressline1;
-        public string addressline2;
+        public string? addressline1;
+        public string? addressline2;
 
         private Upsert address;
 
@@ -142,7 +140,7 @@ namespace SPTC_APPLICATION.Objects
         {
             address = new Upsert(Table.ADDRESS, -1);
         }
-        public Address(string houseNo, string streetName, string barangay, string city, string zipcode, string province, string country)
+        public Address(string? houseNo, string? streetName, string? barangay, string? city, string? zipcode, string? province, string? country)
         {
             this.houseNo = houseNo;
             this.streetname = streetName;
@@ -154,7 +152,7 @@ namespace SPTC_APPLICATION.Objects
             address = new Upsert(Table.ADDRESS, -1);
         }
 
-        public Address(string addressline1, string addressline2)
+        public Address(string? addressline1, string? addressline2)
         {
             this.addressline1 = addressline1;
             this.addressline2 = addressline2;
@@ -162,7 +160,7 @@ namespace SPTC_APPLICATION.Objects
         }
         public Address(MySqlDataReader reader)
         {
-            address = null;
+            address = null!;
             this.id = Retrieve.GetValueOrDefault<int>(reader, Field.ID);
             this.houseNo = Retrieve.GetValueOrDefault<string>(reader, Field.HOUSENO);
             this.streetname = Retrieve.GetValueOrDefault<string>(reader, Field.STREETNAME);
@@ -185,15 +183,15 @@ namespace SPTC_APPLICATION.Objects
                 address = new Upsert(Table.ADDRESS, id);
             }
 
-            address.Insert(Field.ADDRESSLINE1, this.addressline1);
-            address.Insert(Field.ADDRESSLINE2, this.addressline2);
-            address.Insert(Field.HOUSENO, houseNo);
-            address.Insert(Field.STREETNAME, streetname);
-            address.Insert(Field.BARANGAY, barangay);
-            address.Insert(Field.CITY, city);
-            address.Insert(Field.ZIPCODE, zipcode);
-            address.Insert(Field.PROVINCE, province);
-            address.Insert(Field.COUNTRY, country);
+            address.Insert(Field.ADDRESSLINE1, this.addressline1!);
+            address.Insert(Field.ADDRESSLINE2, this.addressline2!);
+            address.Insert(Field.HOUSENO, houseNo!);
+            address.Insert(Field.STREETNAME, streetname!);
+            address.Insert(Field.BARANGAY, barangay!);
+            address.Insert(Field.CITY, city!);
+            address.Insert(Field.ZIPCODE, zipcode!);
+            address.Insert(Field.PROVINCE, province!);
+            address.Insert(Field.COUNTRY, country!);
             address.Save();
             id = address.id;
 
@@ -229,11 +227,16 @@ namespace SPTC_APPLICATION.Objects
 
     }
 
+    /// <summary>
+    /// Represents a stored image (binary blob) in the database.
+    /// WPF-specific ImageSource / BitmapImage members have been removed;
+    /// raw byte[] is used for cross-platform (net8.0 / Linux AKS) compatibility.
+    /// </summary>
     public class Image
     {
         public int id { get; private set; }
-        public byte[] picture;
-        public string name;
+        public byte[]? picture;
+        public string? name;
 
         private Upsert image;
 
@@ -241,23 +244,16 @@ namespace SPTC_APPLICATION.Objects
         {
             image = new Upsert(Table.IMAGE, -1);
         }
-        public Image(byte[] imagebitmap, string name)
+        public Image(byte[]? imagebitmap, string? name)
         {
             this.name = name;
             this.picture = imagebitmap;
             image = new Upsert(Table.IMAGE, -1);
         }
 
-        public Image(ImageSource source, string name)
-        {
-            this.name = name;
-            this.picture = ImageSourceToByte(source);
-            image = new Upsert(Table.IMAGE, -1);
-        }
-
         public Image(MySqlDataReader reader)
         {
-            image = null;
+            image = null!;
             this.id = Retrieve.GetValueOrDefault<int>(reader, Field.ID);
 
             int imageOrdinal = reader.GetOrdinal(Field.IMAGE_SOURCE);
@@ -275,49 +271,16 @@ namespace SPTC_APPLICATION.Objects
             this.name = Retrieve.GetValueOrDefault<string>(reader, Field.IMAGE_NAME);
         }
 
-        public ImageSource GetSource()
+        /// <summary>
+        /// Returns the raw image bytes as a MemoryStream for use with ASP.NET Core
+        /// response streams or other cross-platform consumers.
+        /// </summary>
+        public MemoryStream? GetStream()
         {
             if (picture == null || picture.Length == 0)
                 return null;
 
-            BitmapImage image = new BitmapImage();
-            using (MemoryStream memoryStream = new MemoryStream(picture))
-            {
-                memoryStream.Position = 0;
-
-                image.BeginInit();
-                image.CacheOption = BitmapCacheOption.OnLoad;
-                image.StreamSource = memoryStream;
-                image.EndInit();
-            }
-
-            return image;
-        }
-
-        private byte[] ImageSourceToByte(ImageSource imageSource)
-        {
-            if (imageSource is BitmapSource bitmapSource)
-            {
-                BitmapEncoder encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
-
-                using (MemoryStream memoryStream = new MemoryStream())
-                {
-                    encoder.Save(memoryStream);
-                    return memoryStream.ToArray();
-                }
-            }
-            else if (imageSource is BitmapImage bitmapImage)
-            {
-                using (MemoryStream memoryStream = new MemoryStream())
-                {
-                    BitmapEncoder encoder = new PngBitmapEncoder();
-                    encoder.Frames.Add(BitmapFrame.Create(bitmapImage));
-                    encoder.Save(memoryStream);
-                    return memoryStream.ToArray();
-                }
-            }
-            return null;
+            return new MemoryStream(picture);
         }
 
         public int Save()
@@ -327,8 +290,8 @@ namespace SPTC_APPLICATION.Objects
                 image = new Upsert(Table.IMAGE, id);
             }
 
-            image.Insert(Field.IMAGE_NAME, name);
-            image.Insert(Field.IMAGE_SOURCE, picture);
+            image.Insert(Field.IMAGE_NAME, name!);
+            image.Insert(Field.IMAGE_SOURCE, picture!);
             image.Save();
             id = image.id;
 
@@ -355,7 +318,7 @@ namespace SPTC_APPLICATION.Objects
     public class Position
     {
         public int id { get; private set; }
-        public string title;
+        public string? title;
         public bool canCreate;
         public bool canEdit;
         public bool canDelete;
@@ -365,7 +328,7 @@ namespace SPTC_APPLICATION.Objects
             position = new Upsert(Table.POSITION, -1);
         }
 
-        public Position(string title, bool canCreate, bool canEdit, bool canDelete)
+        public Position(string? title, bool canCreate, bool canEdit, bool canDelete)
         {
             this.title = title;
             this.canCreate = canCreate;
@@ -376,6 +339,7 @@ namespace SPTC_APPLICATION.Objects
 
         public Position(MySqlDataReader reader)
         {
+            position = null!;
             this.id = Retrieve.GetValueOrDefault<int>(reader, Field.ID);
             this.title = Retrieve.GetValueOrDefault<string>(reader, Field.TITLE);
             this.canCreate = Retrieve.GetValueOrDefault<bool>(reader, Field.CAN_CREATE);
@@ -390,7 +354,7 @@ namespace SPTC_APPLICATION.Objects
                 position = new Upsert(Table.POSITION, id);
             }
 
-            position.Insert(Field.TITLE, title);
+            position.Insert(Field.TITLE, title!);
             position.Insert(Field.CAN_CREATE, canCreate);
             position.Insert(Field.CAN_EDIT, canEdit);
             position.Insert(Field.CAN_DELETE, canDelete);
@@ -421,8 +385,8 @@ namespace SPTC_APPLICATION.Objects
     public class ViolationType
     {
         public int id { get; private set; }
-        public string title;
-        public string details;
+        public string? title;
+        public string? details;
         public int numOfDays;
         public bool isForDriver;
 
@@ -432,16 +396,18 @@ namespace SPTC_APPLICATION.Objects
             violationType = new Upsert(Table.VIOLATION_TYPE, -1);
         }
 
-        public ViolationType(string title, string details, int numOfDays, bool isForDriver)
+        public ViolationType(string? title, string? details, int numOfDays, bool isForDriver)
         {
             this.title = title;
             this.details = details;
             this.numOfDays = numOfDays;
             this.isForDriver = isForDriver;
+            this.violationType = new Upsert(Table.VIOLATION_TYPE, -1);
         }
 
         public ViolationType(MySqlDataReader reader)
         {
+            violationType = null!;
             this.id = Retrieve.GetValueOrDefault<int>(reader, Field.ID);
             this.title = Retrieve.GetValueOrDefault<string>(reader, Field.TITLE);
             this.details = Retrieve.GetValueOrDefault<string>(reader, Field.DETAILS);
@@ -456,8 +422,8 @@ namespace SPTC_APPLICATION.Objects
                 violationType = new Upsert(Table.VIOLATION_TYPE, id);
             }
 
-            violationType.Insert(Field.TITLE, title);
-            violationType.Insert(Field.DETAILS, details);
+            violationType.Insert(Field.TITLE, title!);
+            violationType.Insert(Field.DETAILS, details!);
             violationType.Insert(Field.NUM_OF_DAYS, numOfDays);
             violationType.Insert(Field.IS_FOR_DRIVER, isForDriver);
             violationType.Save();
