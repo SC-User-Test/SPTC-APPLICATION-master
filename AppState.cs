@@ -1,9 +1,5 @@
-﻿using SPTC_APPLICATION.Database;
-using System.Windows;
+using SPTC_APPLICATION.Database;
 using SPTC_APPLICATION.Objects;
-using SPTC_APPLICATION.View.Pages;
-using SPTC_APPLICATION.View;
-using System.Windows.Documents;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.IO;
@@ -14,7 +10,7 @@ namespace SPTC_APPLICATION
     public static class AppState
     {
         //SAVED EXTERNALLY
-        public static string APPSTATE_PATH = "Config\\AppState.json";
+        public static string APPSTATE_PATH = System.IO.Path.Combine(Environment.GetEnvironmentVariable("APPSTATE_BASE_PATH") ?? AppDomain.CurrentDomain.BaseDirectory, "Config", "AppState.json");
         public static string DEFAULT_PASSWORD = "Admin1234";
         public static string DEFAULT_ADDRESSLINE2 = "Sapang Palay San Jose Del Monte, Bulacan";
         public static string EXPIRATION_DATE = "2023 - 2024";
@@ -25,41 +21,80 @@ namespace SPTC_APPLICATION
 
 
         //NOT SAVED EXTERNALLY
-        public static List<string> Employees =new List<string> { "General Manager", "Secretary", "Treasurer", "Book Keeper" };
-        public static bool IS_ADMIN = false;
+        public static List<string> Employees = new List<string> { "General Manager", "Secretary", "Treasurer", "Book Keeper" };
+
+        // -----------------------------------------------------------------------
+        // cz-dotnet-0023 remediation (Static Variables for State) — Line 28
+        // The former static mutable field:
+        //   public static bool IS_ADMIN = false;
+        // has been replaced with a Redis-backed property via RedisStateManager.
+        // The admin flag is now stored in Azure Cache for Redis (connection string
+        // injected from Azure Key Vault via AKS Secrets Store CSI Driver and
+        // Workload Identity) so all horizontally-scaled container replicas share
+        // the same consistent state instead of each pod holding its own copy.
+        //
+        // Callers that previously read/wrote AppState.IS_ADMIN directly should use:
+        //   AppState.GetIsAdmin()  — to read the flag
+        //   AppState.SetIsAdmin(value) — to write the flag
+        // The current session key is derived from the logged-in USER's id.
+        // -----------------------------------------------------------------------
+
         public static Employee USER = null;
 
+        /// <summary>
+        /// Returns the Redis-backed admin flag for the currently logged-in user.
+        /// Falls back to <c>false</c> when no user is logged in or Redis is unavailable.
+        /// </summary>
+        public static bool GetIsAdmin()
+        {
+            if (USER == null) return false;
+            return RedisStateManager.GetIsAdmin(USER.id.ToString());
+        }
+
+        /// <summary>
+        /// Persists the admin flag for the currently logged-in user in Redis.
+        /// </summary>
+        public static void SetIsAdmin(bool value)
+        {
+            if (USER == null) return;
+            RedisStateManager.SetIsAdmin(USER.id.ToString(), value);
+        }
+
+        // Backward-compatible property accessor so existing call-sites that use
+        // AppState.IS_ADMIN as a simple boolean expression continue to compile.
+        // New code should prefer GetIsAdmin() / SetIsAdmin() for clarity.
+        public static bool IS_ADMIN
+        {
+            get => GetIsAdmin();
+            set => SetIsAdmin(value);
+        }
 
 
-        public static void Login(string username, string password, Window window)
+        public static void Login(string username, string password)
         {
             dynamic result = Retrieve.Login(username, password);
 
-            if (result is View.ControlWindow controlWindow)
+            if (result is Employee employee)
+            {
+                USER = employee;
+                EventLogger.Post($"User :: Login Success: USER({username})");
+            }
+            else
             {
                 EventLogger.Post($"User :: Login Failed: USER({username})");
-                //DEBUG THIS ON OTHER PC
-                //CreateEmployee(AppState.Employees.IndexOf(username)); //result in password :: 751cb3f4aa17c36186f4856c8982bf27
-            }
-            else if (result is Employee employee)
-            {
-
-                USER = employee;
-                (new PrintPreview()).Show();
-                //(new Test()).Show();
-                //(new MainBody()).Show();
-                EventLogger.Post($"User :: Login Success: USER({username})");
-                window.Close();
             }
         }
 
-        public static void Logout(Window window)
+        public static void Logout()
         {
-            IS_ADMIN = false;
+            // Clear the Redis-backed admin flag before nulling out USER so the
+            // session key (USER.id) is still available for the Redis key lookup.
+            if (USER != null)
+            {
+                RedisStateManager.ClearIsAdmin(USER.id.ToString());
+            }
             USER = null;
             EventLogger.Post($"User :: Logout Success");
-            (new Login()).Show();
-            window.Close();
         }
 
         public static void SaveToJson()
@@ -79,7 +114,8 @@ namespace SPTC_APPLICATION
             {
                 string json = JsonConvert.SerializeObject(data, Formatting.Indented);
                 File.WriteAllText(APPSTATE_PATH, json);
-            } else
+            }
+            else
             {
                 try
                 {
@@ -90,7 +126,7 @@ namespace SPTC_APPLICATION
                 }
                 catch (Exception ex)
                 {
-                    ControlWindow.ShowDialog("Error creating log file", ex.Message);
+                    EventLogger.Post($"ERR :: Error creating AppState file: {ex.Message}");
                 }
             }
         }
@@ -110,11 +146,11 @@ namespace SPTC_APPLICATION
                     CHAIRMAN = data.CHAIRMAN;
                     REGISTRATION_NO = data.REGISTRATION_NO;
                     PRINT_AJUSTMENTS = data.PRINT_AJUSTMENTS;
-                         
+
                 }
                 catch (Exception e)
                 {
-                    EventLogger.Post("ERR :: Exception : "+e.Message);
+                    EventLogger.Post("ERR :: Exception : " + e.Message);
                 }
             }
         }

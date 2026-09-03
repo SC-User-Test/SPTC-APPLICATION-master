@@ -1,13 +1,12 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
-using SPTC_APPLICATION.View;
 
 namespace SPTC_APPLICATION.Objects
 {
     public class EventLogger
     {
-        private static readonly string LogFilePath = "Logs\\log.txt";
+        private static readonly string LogFilePath = System.IO.Path.Combine(Environment.GetEnvironmentVariable("LOG_BASE_PATH") ?? AppDomain.CurrentDomain.BaseDirectory, "Logs", "log.txt");
         private static readonly int MaxLines = 10000;
 
         public static void Post(string message)
@@ -31,7 +30,9 @@ namespace SPTC_APPLICATION.Objects
             }
             catch (Exception ex)
             {
-                ControlWindow.ShowDialog("Error writing to log file", ex.Message);
+                // Log to console/debug output when file logging fails (container-safe fallback)
+                System.Diagnostics.Debug.WriteLine($"[EventLogger] Error writing to log file: {ex.Message}");
+                Console.Error.WriteLine($"[EventLogger] Error writing to log file: {ex.Message}");
             }
         }
 
@@ -46,7 +47,8 @@ namespace SPTC_APPLICATION.Objects
                 }
                 catch (Exception ex)
                 {
-                    ControlWindow.ShowDialog("Error creating log file", ex.Message);
+                    System.Diagnostics.Debug.WriteLine($"[EventLogger] Error creating log file: {ex.Message}");
+                    Console.Error.WriteLine($"[EventLogger] Error creating log file: {ex.Message}");
                 }
             }
         }

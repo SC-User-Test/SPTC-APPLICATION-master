@@ -1,0 +1,70 @@
+# =============================================================================
+# .dockerignore for SPTC APPLICATION
+# Excludes build artefacts, IDE metadata, debug symbols, and temporary files
+# from the Docker build context to reduce image size and improve build speed
+# when deploying to Azure AKS via Azure Container Registry.
+# =============================================================================
+
+# ── Version control ───────────────────────────────────────────────────────────
+.git
+.gitignore
+.gitattributes
+
+# ── Build output directories ──────────────────────────────────────────────────
+bin/
+obj/
+**/bin/
+**/obj/
+**/publish/
+
+# ── PDB / debug symbol files ──────────────────────────────────────────────────
+**/*.pdb
+**/*.mdb
+
+# ── IDE / editor metadata ─────────────────────────────────────────────────────
+.vs/
+.vscode/
+*.user
+*.suo
+*.DotSettings
+*.DotSettings.user
+.idea/
+*.swp
+*.swo
+
+# ── Visual Studio launch settings ────────────────────────────────────────────
+**/Properties/launchSettings.json
+
+# ── Test projects and artefacts ───────────────────────────────────────────────
+**/*Tests*/
+**/*Test*/
+**/TestResults/
+
+# ── NuGet package cache ───────────────────────────────────────────────────────
+packages/
+*.nupkg
+*.snupkg
+
+# ── Temporary and OS files ────────────────────────────────────────────────────
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.tmp
+*.temp
+*.log
+*.bak
+*.orig
+
+# ── Documentation ─────────────────────────────────────────────────────────────
+README.md
+CHANGELOG.md
+LICENSE
+docs/
+
+# ── Docker files themselves ───────────────────────────────────────────────────
+Dockerfile*
+.dockerignore
+
+# ── Scripts ───────────────────────────────────────────────────────────────────
+scripts/
+kubernetes/

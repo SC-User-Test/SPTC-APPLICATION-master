@@ -1,0 +1,65 @@
+version: "3.9"
+
+# =============================================================================
+# docker-compose.yml for SPTC APPLICATION
+# Application service only – no database, Redis, or other infrastructure.
+# External services are provided separately and connected via environment vars.
+# =============================================================================
+
+services:
+  sptc-application:
+    image: sptc-application:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sptc-application
+    ports:
+      - "8080:8080"
+    environment:
+      # Health check port (matches HealthCheckService.cs default)
+      - HEALTH_CHECK_PORT=8080
+
+      # Application state base path
+      - APPSTATE_BASE_PATH=/app/data
+
+      # MySQL connection settings – override with actual values at runtime
+      - MYSQL_HOST=${MYSQL_HOST:-localhost}
+      - MYSQL_PORT=${MYSQL_PORT:-3306}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-dtb_sptc}
+      - MYSQL_USERNAME=${MYSQL_USERNAME:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-}
+
+      # Redis connection string – injected from Azure Key Vault in AKS
+      - REDIS_CONNECTION_STRING=${REDIS_CONNECTION_STRING:-}
+
+      # .NET runtime settings
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+    volumes:
+      # Persistent application state and config
+      - sptc-data:/app/data
+      # Application logs
+      - sptc-logs:/app/logs
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+    restart: unless-stopped
+
+    networks:
+      - app-network
+
+volumes:
+  sptc-data:
+    driver: local
+  sptc-logs:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge

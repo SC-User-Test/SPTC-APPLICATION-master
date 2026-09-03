@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using MySql.Data.MySqlClient;
 using SPTC_APPLICATION.Objects;
-using SPTC_APPLICATION.View;
 
 namespace SPTC_APPLICATION.Database
 {
@@ -54,7 +53,6 @@ namespace SPTC_APPLICATION.Database
         {
             try
             {
-                string query = RequestQuery.LOGIN_EMPLOYEE;
                 MySqlParameter usernameParam = new MySqlParameter("titleParam", username);
                 MySqlParameter passwordParam = new MySqlParameter("passwordParam", RequestQuery.Protect(password));
 
@@ -65,26 +63,16 @@ namespace SPTC_APPLICATION.Database
                 }
                 else
                 {
-                    return ControlWindow.ShowDialog("Wrong Password", "Username and Password not Match.", Icons.ERROR);
+                    EventLogger.Post($"DTB :: Login Failed for user: {username}");
+                    return null;
                 }
             }
             catch (MySqlException ex)
             {
-                return ControlWindow.ShowDialog("TRY AGAIN", "Exception Occurred: \n" + ex.Message, Icons.ERROR);
+                EventLogger.Post($"DTB :: Login Exception: {ex.Message}");
+                return null;
             }
         }
-
-        /* private static async Task<object?> GetFieldValueAsync(MySqlDataReader reader, int index)
-         {
-             if (await reader.IsDBNullAsync(index))
-             {
-                 return null;
-             }
-             else
-             {
-                 return await reader.GetFieldValueAsync<object>(index);
-             }
-         }*/
 
         public static List<T> GetData<T>(string tableName, string selectQuery, string whereQuery, params MySqlParameter[] parameters)
         {

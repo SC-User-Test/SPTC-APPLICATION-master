@@ -1,7 +1,7 @@
-﻿using System.IO;
+using System.IO;
 using System.Linq;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
+using System.Drawing;
+using System.Drawing.Imaging;
 using MySql.Data.MySqlClient;
 using SPTC_APPLICATION.Database;
 
@@ -248,13 +248,6 @@ namespace SPTC_APPLICATION.Objects
             image = new Upsert(Table.IMAGE, -1);
         }
 
-        public Image(ImageSource source, string name)
-        {
-            this.name = name;
-            this.picture = ImageSourceToByte(source);
-            image = new Upsert(Table.IMAGE, -1);
-        }
-
         public Image(MySqlDataReader reader)
         {
             image = null;
@@ -275,49 +268,27 @@ namespace SPTC_APPLICATION.Objects
             this.name = Retrieve.GetValueOrDefault<string>(reader, Field.IMAGE_NAME);
         }
 
-        public ImageSource GetSource()
+        /// <summary>
+        /// Returns the image as a byte array suitable for display or further processing.
+        /// </summary>
+        public byte[] GetBytes()
+        {
+            return picture;
+        }
+
+        /// <summary>
+        /// Returns a System.Drawing.Bitmap from the stored byte array.
+        /// Returns null if no picture data is available.
+        /// </summary>
+        public Bitmap GetBitmap()
         {
             if (picture == null || picture.Length == 0)
                 return null;
 
-            BitmapImage image = new BitmapImage();
-            using (MemoryStream memoryStream = new MemoryStream(picture))
+            using (MemoryStream ms = new MemoryStream(picture))
             {
-                memoryStream.Position = 0;
-
-                image.BeginInit();
-                image.CacheOption = BitmapCacheOption.OnLoad;
-                image.StreamSource = memoryStream;
-                image.EndInit();
+                return new Bitmap(ms);
             }
-
-            return image;
-        }
-
-        private byte[] ImageSourceToByte(ImageSource imageSource)
-        {
-            if (imageSource is BitmapSource bitmapSource)
-            {
-                BitmapEncoder encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
-
-                using (MemoryStream memoryStream = new MemoryStream())
-                {
-                    encoder.Save(memoryStream);
-                    return memoryStream.ToArray();
-                }
-            }
-            else if (imageSource is BitmapImage bitmapImage)
-            {
-                using (MemoryStream memoryStream = new MemoryStream())
-                {
-                    BitmapEncoder encoder = new PngBitmapEncoder();
-                    encoder.Frames.Add(BitmapFrame.Create(bitmapImage));
-                    encoder.Save(memoryStream);
-                    return memoryStream.ToArray();
-                }
-            }
-            return null;
         }
 
         public int Save()
