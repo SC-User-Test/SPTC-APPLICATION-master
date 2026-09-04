@@ -1,0 +1,79 @@
+# =============================================================================
+# .dockerignore – SPTC APPLICATION
+# =============================================================================
+# Excludes build artefacts, source files, IDE metadata, and sensitive files
+# from the Docker build context to reduce upload time and image size.
+# =============================================================================
+
+# Build output directories
+**/bin/
+**/obj/
+
+# Debug symbols and PDB files
+**/*.pdb
+**/*.mdb
+
+# Visual Studio / IDE artefacts
+**/.vs/
+**/.vscode/
+**/*.user
+**/*.suo
+**/*.userosscache
+**/*.sln.docstates
+**/*.DotSettings
+**/*.DotSettings.user
+**/TestResults/
+**/.idea/
+
+# NuGet packages directory
+**/packages/
+**/*.nupkg
+**/*.snupkg
+
+# Temporary and log files
+**/*.tmp
+**/*.temp
+**/*.log
+**/Thumbs.db
+**/.DS_Store
+**/desktop.ini
+
+# Signing keys and certificates
+**/*.pfx
+**/*.p12
+**/*.key
+**/*.cer
+**/*.crt
+**/*.pem
+
+# Git metadata
+**/.git/
+**/.gitignore
+**/.gitattributes
+
+# CI/CD and deployment configuration
+**/azure-pipelines.yml
+**/Jenkinsfile
+**/.github/
+**/k8s/
+**/helm/
+**/charts/
+**/deploy/
+**/scripts/
+**/docs/
+**/kubernetes/
+
+# Test projects and test output
+**/*Tests*/
+**/*Test*/
+**/*Spec*/
+**/coverage/
+
+# Documentation
+**/*.md
+**/*.txt
+**/LICENSE
+**/README*
+
+# Launch settings (development only)
+**/launchSettings.json

@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using SPTC_APPLICATION.Objects;
 
 namespace SPTC_APPLICATION
@@ -9,10 +9,12 @@ namespace SPTC_APPLICATION
     public partial class App : Application
     {
         private int openWindowCount = 0;
+        private readonly HealthCheckService _healthCheckService = new HealthCheckService();
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            _healthCheckService.Start();
             IncrementOpenWindowCount();
         }
 
@@ -24,6 +26,7 @@ namespace SPTC_APPLICATION
             {
                 EventLogger.Post("Main :: Application Closed");
                 AppState.SaveToJson();
+                _healthCheckService.Stop();
             }
         }
         public void IncrementOpenWindowCount()

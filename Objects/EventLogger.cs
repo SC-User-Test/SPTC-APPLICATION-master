@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
-using SPTC_APPLICATION.View;
 
 namespace SPTC_APPLICATION.Objects
 {
     public class EventLogger
     {
-        private static readonly string LogFilePath = "Logs\\log.txt";
+        private static readonly string LogFilePath = Path.Combine(
+            Environment.GetEnvironmentVariable("LOG_DIR") ?? "Logs", "log.txt");
         private static readonly int MaxLines = 10000;
 
         public static void Post(string message)
@@ -23,7 +23,9 @@ namespace SPTC_APPLICATION.Objects
 
                 if (updatedLogContents.CountLines() > MaxLines)
                 {
-                    string[] lines = updatedLogContents.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] lines = updatedLogContents.Split(
+                        new[] { Environment.NewLine },
+                        StringSplitOptions.RemoveEmptyEntries);
                     updatedLogContents = string.Join(Environment.NewLine, lines.Take(MaxLines));
                 }
 
@@ -31,7 +33,8 @@ namespace SPTC_APPLICATION.Objects
             }
             catch (Exception ex)
             {
-                ControlWindow.ShowDialog("Error writing to log file", ex.Message);
+                // In a headless ASP.NET Core container, write errors to stderr
+                Console.Error.WriteLine($"EventLogger :: Error writing to log file: {ex.Message}");
             }
         }
 
@@ -41,17 +44,17 @@ namespace SPTC_APPLICATION.Objects
             {
                 try
                 {
-                    Directory.CreateDirectory(Path.GetDirectoryName(LogFilePath));
+                    string dir = Path.GetDirectoryName(LogFilePath);
+                    if (!string.IsNullOrEmpty(dir))
+                        Directory.CreateDirectory(dir);
                     File.Create(LogFilePath).Close();
                 }
                 catch (Exception ex)
                 {
-                    ControlWindow.ShowDialog("Error creating log file", ex.Message);
+                    Console.Error.WriteLine($"EventLogger :: Error creating log file: {ex.Message}");
                 }
             }
         }
-
-
     }
 
     public static class StringExtensions
@@ -72,6 +75,4 @@ namespace SPTC_APPLICATION.Objects
             return count;
         }
     }
-
-
 }

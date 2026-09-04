@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  sptc-application:
+    image: sptc-application:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sptc-application
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - PORT=8080
+      - HEALTH_CHECK_PORT=8080
+      # MySQL connection settings – supply via .env file or docker-compose override
+      - MYSQL_HOST=${MYSQL_HOST:-localhost}
+      - MYSQL_PORT=${MYSQL_PORT:-3306}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-dtb_sptc}
+      - MYSQL_USERNAME=${MYSQL_USERNAME:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-}
+      # Redis connection string – supply via .env file or docker-compose override
+      - REDIS_CONNECTION_STRING=${REDIS_CONNECTION_STRING:-localhost:6379}
+    volumes:
+      - sptc-logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  sptc-logs:
+    driver: local

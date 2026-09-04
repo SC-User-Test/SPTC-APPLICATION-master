@@ -1,25 +1,24 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using MySql.Data.MySqlClient;
 using SPTC_APPLICATION.Objects;
-using SPTC_APPLICATION.View;
 
 namespace SPTC_APPLICATION.Database
 {
-    //USABE:
+    //USAGE:
     /*
      all static class
     Login(username password) for Employees only
-    await Retrieve.GetData<object>() this is the main functionality of the Retrieve, it will retrieve from dtabase whatever (tablename, selectquery, wherequery, mysqlparameters) inputted
-    make sure that every <object has the receiver constructor like this
-    public object(MySqlReader reader)
+    await Retrieve.GetData<object>() this is the main functionality of the Retrieve, it will retrieve from database whatever (tablename, selectquery, wherequery, mysqlparameters) inputted
+    make sure that every <object> has the receiver constructor like this
+    public object(MySqlDataReader reader)
     {
          //SET THE RESULT OF reader to each class attribute
     }
 
     for result containing a foreign key use
-    Retrieve.GetValueOrDefault(reader, ForeinKey Field)
+    Retrieve.GetValueOrDefault(reader, ForeignKey Field)
 
     it is recommended if there are foreign keys to create a Populate(ForeignKeyResults int) then await Retrieve each and store to each respective class attr
     create also an Empty constructor without parameters to Specify empty or null result from database
@@ -28,15 +27,12 @@ namespace SPTC_APPLICATION.Database
     {
         private static Employee ExecuteQueryAsync(string query, params MySqlParameter[] parameters)
         {
-            List<object[]> rows = new List<object[]>();
-
             using (MySqlConnection connection = DatabaseConnection.GetConnection())
             {
                 connection.Open();
 
                 MySqlCommand command = new MySqlCommand(query, connection);
                 command.Parameters.AddRange(parameters);
-
 
                 using (MySqlDataReader reader = command.ExecuteReader())
                 {
@@ -54,7 +50,6 @@ namespace SPTC_APPLICATION.Database
         {
             try
             {
-                string query = RequestQuery.LOGIN_EMPLOYEE;
                 MySqlParameter usernameParam = new MySqlParameter("titleParam", username);
                 MySqlParameter passwordParam = new MySqlParameter("passwordParam", RequestQuery.Protect(password));
 
@@ -65,26 +60,16 @@ namespace SPTC_APPLICATION.Database
                 }
                 else
                 {
-                    return ControlWindow.ShowDialog("Wrong Password", "Username and Password not Match.", Icons.ERROR);
+                    EventLogger.Post($"Login :: Wrong Password for user: {username}");
+                    return null;
                 }
             }
             catch (MySqlException ex)
             {
-                return ControlWindow.ShowDialog("TRY AGAIN", "Exception Occurred: \n" + ex.Message, Icons.ERROR);
+                EventLogger.Post($"Login :: Exception Occurred: {ex.Message}");
+                return null;
             }
         }
-
-        /* private static async Task<object?> GetFieldValueAsync(MySqlDataReader reader, int index)
-         {
-             if (await reader.IsDBNullAsync(index))
-             {
-                 return null;
-             }
-             else
-             {
-                 return await reader.GetFieldValueAsync<object>(index);
-             }
-         }*/
 
         public static List<T> GetData<T>(string tableName, string selectQuery, string whereQuery, params MySqlParameter[] parameters)
         {
@@ -173,7 +158,6 @@ namespace SPTC_APPLICATION.Database
             return default(T);
         }
 
-
         public static T GetValueOrDefault<T>(MySqlDataReader reader, string columnName)
         {
             try
@@ -187,8 +171,5 @@ namespace SPTC_APPLICATION.Database
                 return default(T);
             }
         }
-
-
-
     }
 }

@@ -1,7 +1,5 @@
-﻿using System.IO;
+using System.IO;
 using System.Linq;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using MySql.Data.MySqlClient;
 using SPTC_APPLICATION.Database;
 
@@ -13,7 +11,6 @@ namespace SPTC_APPLICATION.Objects
         OPERATOR,
         DRIVER_DAY,
         DRIVAR_NIGHT,
-
 
         NEW_DRIVER,
         NEW_OPERATOR,
@@ -32,7 +29,6 @@ namespace SPTC_APPLICATION.Objects
         FETCH_PAYMENT_DETAILS_USING_ID,
         NEW_PAYMENT_DETAILS,
     }
-
 
     public class Name
     {
@@ -56,7 +52,6 @@ namespace SPTC_APPLICATION.Objects
             }
             private set { }
         }
-
 
         private Upsert name;
 
@@ -127,12 +122,10 @@ namespace SPTC_APPLICATION.Objects
         public string houseNo;
         public string streetname;
         public string barangay;
-
         public string city;
         public string province;
         public string zipcode;
         public string country;
-
         public string addressline1;
         public string addressline2;
 
@@ -142,6 +135,7 @@ namespace SPTC_APPLICATION.Objects
         {
             address = new Upsert(Table.ADDRESS, -1);
         }
+
         public Address(string houseNo, string streetName, string barangay, string city, string zipcode, string province, string country)
         {
             this.houseNo = houseNo;
@@ -160,6 +154,7 @@ namespace SPTC_APPLICATION.Objects
             this.addressline2 = addressline2;
             address = new Upsert(Table.ADDRESS, -1);
         }
+
         public Address(MySqlDataReader reader)
         {
             address = null;
@@ -173,10 +168,7 @@ namespace SPTC_APPLICATION.Objects
             this.country = Retrieve.GetValueOrDefault<string>(reader, Field.COUNTRY);
             this.addressline1 = Retrieve.GetValueOrDefault<string>(reader, Field.ADDRESSLINE1);
             this.addressline2 = Retrieve.GetValueOrDefault<string>(reader, Field.ADDRESSLINE2);
-
         }
-
-
 
         public int Save()
         {
@@ -199,13 +191,17 @@ namespace SPTC_APPLICATION.Objects
 
             return id;
         }
+
         public override string ToString()
         {
             if (!string.IsNullOrEmpty(addressline1) && !string.IsNullOrEmpty(addressline2))
             {
                 return $"{addressline1} {addressline2}";
             }
-            else if (!string.IsNullOrEmpty(houseNo) || !string.IsNullOrEmpty(streetname) || !string.IsNullOrEmpty(barangay) || !string.IsNullOrEmpty(city) || !string.IsNullOrEmpty(province) || !string.IsNullOrEmpty(zipcode) || !string.IsNullOrEmpty(country))
+            else if (!string.IsNullOrEmpty(houseNo) || !string.IsNullOrEmpty(streetname) ||
+                     !string.IsNullOrEmpty(barangay) || !string.IsNullOrEmpty(city) ||
+                     !string.IsNullOrEmpty(province) || !string.IsNullOrEmpty(zipcode) ||
+                     !string.IsNullOrEmpty(country))
             {
                 return $"{houseNo} {streetname}, {barangay}, {city}, {province}, {country}";
             }
@@ -226,9 +222,13 @@ namespace SPTC_APPLICATION.Objects
             }
             return false;
         }
-
     }
 
+    /// <summary>
+    /// Cross-platform image model – stores raw binary image data.
+    /// WPF-specific ImageSource / BitmapImage types have been removed
+    /// to support Linux container deployment on AKS.
+    /// </summary>
     public class Image
     {
         public int id { get; private set; }
@@ -241,17 +241,11 @@ namespace SPTC_APPLICATION.Objects
         {
             image = new Upsert(Table.IMAGE, -1);
         }
+
         public Image(byte[] imagebitmap, string name)
         {
             this.name = name;
             this.picture = imagebitmap;
-            image = new Upsert(Table.IMAGE, -1);
-        }
-
-        public Image(ImageSource source, string name)
-        {
-            this.name = name;
-            this.picture = ImageSourceToByte(source);
             image = new Upsert(Table.IMAGE, -1);
         }
 
@@ -275,49 +269,16 @@ namespace SPTC_APPLICATION.Objects
             this.name = Retrieve.GetValueOrDefault<string>(reader, Field.IMAGE_NAME);
         }
 
-        public ImageSource GetSource()
+        /// <summary>
+        /// Returns the raw image bytes as a base64-encoded data URI
+        /// suitable for use in HTML img tags (Razor Pages / API responses).
+        /// </summary>
+        public string GetDataUri(string mimeType = "image/png")
         {
             if (picture == null || picture.Length == 0)
-                return null;
+                return string.Empty;
 
-            BitmapImage image = new BitmapImage();
-            using (MemoryStream memoryStream = new MemoryStream(picture))
-            {
-                memoryStream.Position = 0;
-
-                image.BeginInit();
-                image.CacheOption = BitmapCacheOption.OnLoad;
-                image.StreamSource = memoryStream;
-                image.EndInit();
-            }
-
-            return image;
-        }
-
-        private byte[] ImageSourceToByte(ImageSource imageSource)
-        {
-            if (imageSource is BitmapSource bitmapSource)
-            {
-                BitmapEncoder encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
-
-                using (MemoryStream memoryStream = new MemoryStream())
-                {
-                    encoder.Save(memoryStream);
-                    return memoryStream.ToArray();
-                }
-            }
-            else if (imageSource is BitmapImage bitmapImage)
-            {
-                using (MemoryStream memoryStream = new MemoryStream())
-                {
-                    BitmapEncoder encoder = new PngBitmapEncoder();
-                    encoder.Frames.Add(BitmapFrame.Create(bitmapImage));
-                    encoder.Save(memoryStream);
-                    return memoryStream.ToArray();
-                }
-            }
-            return null;
+            return $"data:{mimeType};base64,{Convert.ToBase64String(picture)}";
         }
 
         public int Save()
@@ -334,10 +295,12 @@ namespace SPTC_APPLICATION.Objects
 
             return id;
         }
+
         public override string ToString()
         {
             return name ?? string.Empty;
         }
+
         public bool Delete()
         {
             if (image == null)
@@ -349,7 +312,6 @@ namespace SPTC_APPLICATION.Objects
             }
             return false;
         }
-
     }
 
     public class Position
@@ -360,6 +322,7 @@ namespace SPTC_APPLICATION.Objects
         public bool canEdit;
         public bool canDelete;
         private Upsert position;
+
         public Position()
         {
             position = new Upsert(Table.POSITION, -1);
@@ -427,6 +390,7 @@ namespace SPTC_APPLICATION.Objects
         public bool isForDriver;
 
         private Upsert violationType;
+
         public ViolationType()
         {
             violationType = new Upsert(Table.VIOLATION_TYPE, -1);
