@@ -1,9 +1,9 @@
-﻿using SPTC_APPLICATION.Database;
+using SPTC_APPLICATION.Database;
 using System.Windows;
 using SPTC_APPLICATION.Objects;
 using SPTC_APPLICATION.View.Pages;
 using SPTC_APPLICATION.View;
-using System.Windows.Documents;
+using SPTC_APPLICATION.View.IDGenerator.Previews;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.IO;
@@ -22,32 +22,23 @@ namespace SPTC_APPLICATION
         public static string REGISTRATION_NO = "9520-03006397";
         public static double PRINT_AJUSTMENTS = 24.67712;
 
-
-
         //NOT SAVED EXTERNALLY
-        public static List<string> Employees =new List<string> { "General Manager", "Secretary", "Treasurer", "Book Keeper" };
+        public static List<string> Employees = new List<string> { "General Manager", "Secretary", "Treasurer", "Book Keeper" };
         public static bool IS_ADMIN = false;
-        public static Employee USER = null;
-
-
+        public static Employee? USER = null;
 
         public static void Login(string username, string password, Window window)
         {
             dynamic result = Retrieve.Login(username, password);
 
-            if (result is View.ControlWindow controlWindow)
+            if (result is ControlWindow controlWindow)
             {
                 EventLogger.Post($"User :: Login Failed: USER({username})");
-                //DEBUG THIS ON OTHER PC
-                //CreateEmployee(AppState.Employees.IndexOf(username)); //result in password :: 751cb3f4aa17c36186f4856c8982bf27
             }
             else if (result is Employee employee)
             {
-
                 USER = employee;
                 (new PrintPreview()).Show();
-                //(new Test()).Show();
-                //(new MainBody()).Show();
                 EventLogger.Post($"User :: Login Success: USER({username})");
                 window.Close();
             }
@@ -79,11 +70,16 @@ namespace SPTC_APPLICATION
             {
                 string json = JsonConvert.SerializeObject(data, Formatting.Indented);
                 File.WriteAllText(APPSTATE_PATH, json);
-            } else
+            }
+            else
             {
                 try
                 {
-                    Directory.CreateDirectory(Path.GetDirectoryName(APPSTATE_PATH));
+                    string? dirPath = Path.GetDirectoryName(APPSTATE_PATH);
+                    if (!string.IsNullOrEmpty(dirPath))
+                    {
+                        Directory.CreateDirectory(dirPath);
+                    }
                     File.Create(APPSTATE_PATH).Close();
                     string json = JsonConvert.SerializeObject(data, Formatting.Indented);
                     File.WriteAllText(APPSTATE_PATH, json);
@@ -102,22 +98,23 @@ namespace SPTC_APPLICATION
                 string json = File.ReadAllText(APPSTATE_PATH);
                 try
                 {
-                    dynamic data = JsonConvert.DeserializeObject(json);
-                    APPSTATE_PATH = data.APPSTATE_PATH;
-                    DEFAULT_PASSWORD = data.DEFAULT_PASSWORD;
-                    DEFAULT_ADDRESSLINE2 = data.DEFAULT_ADDRESSLINE2;
-                    EXPIRATION_DATE = data.EXPIRATION_DATE;
-                    CHAIRMAN = data.CHAIRMAN;
-                    REGISTRATION_NO = data.REGISTRATION_NO;
-                    PRINT_AJUSTMENTS = data.PRINT_AJUSTMENTS;
-                         
+                    dynamic? data = JsonConvert.DeserializeObject(json);
+                    if (data != null)
+                    {
+                        APPSTATE_PATH = data.APPSTATE_PATH;
+                        DEFAULT_PASSWORD = data.DEFAULT_PASSWORD;
+                        DEFAULT_ADDRESSLINE2 = data.DEFAULT_ADDRESSLINE2;
+                        EXPIRATION_DATE = data.EXPIRATION_DATE;
+                        CHAIRMAN = data.CHAIRMAN;
+                        REGISTRATION_NO = data.REGISTRATION_NO;
+                        PRINT_AJUSTMENTS = data.PRINT_AJUSTMENTS;
+                    }
                 }
                 catch (Exception e)
                 {
-                    EventLogger.Post("ERR :: Exception : "+e.Message);
+                    EventLogger.Post("ERR :: Exception : " + e.Message);
                 }
             }
         }
     }
-
 }

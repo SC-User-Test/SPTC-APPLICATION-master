@@ -1,11 +1,12 @@
-﻿using System;
-
+using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 
-
+// NOTE: System.Drawing.Bitmap is available in .NET 8 via the System.Drawing.Common NuGet package.
+// However, System.Drawing.Common on .NET 8 is Windows-only (throws PlatformNotSupportedException on non-Windows).
+// This application targets net8.0-windows so this usage is acceptable.
 
 namespace SPTC_APPLICATION.Objects
 {
@@ -13,6 +14,10 @@ namespace SPTC_APPLICATION.Objects
     {
         public static class BitmapConversion
         {
+            /// <summary>
+            /// Converts a System.Drawing.Bitmap to a WPF BitmapSource.
+            /// Uses GDI interop - Windows-only, compatible with net8.0-windows target.
+            /// </summary>
             public static BitmapSource ToBitmapSource(Bitmap bitmap)
             {
                 IntPtr hBitmap = bitmap.GetHbitmap();
@@ -30,6 +35,9 @@ namespace SPTC_APPLICATION.Objects
                 }
             }
 
+            /// <summary>
+            /// Converts a WPF BitmapSource to a System.Drawing.Bitmap.
+            /// </summary>
             public static Bitmap ToBitmap(BitmapSource bitmapSource)
             {
                 using (MemoryStream stream = new MemoryStream())
@@ -52,6 +60,5 @@ namespace SPTC_APPLICATION.Objects
             [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
             public static extern bool DeleteObject(IntPtr hObject);
         }
-
     }
 }

@@ -1,4 +1,10 @@
-﻿using System.Reflection;
+// AssemblyInfo.cs
+// NOTE: In SDK-style .NET 8 projects, most assembly attributes are auto-generated
+// from the .csproj file properties. This file is kept for WPF-specific ThemeInfo attribute
+// and any custom attributes not covered by the SDK auto-generation.
+// GenerateAssemblyInfo is set to false in the .csproj to avoid duplicate attribute errors.
+
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
 
@@ -10,7 +16,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("SPTC APPLICATION")]
-[assembly: AssemblyCopyright("Copyright ©  2023")]
+[assembly: AssemblyCopyright("Copyright \u00a9  2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -19,16 +25,7 @@ using System.Windows;
 // COM, set the ComVisible attribute to true on that type.
 [assembly: ComVisible(false)]
 
-//In order to begin building localizable applications, set
-//<UICulture>CultureYouAreCodingWith</UICulture> in your .csproj file
-//inside a <PropertyGroup>.  For example, if you are using US english
-//in your source files, set the <UICulture> to en-US.  Then uncomment
-//the NeutralResourceLanguage attribute below.  Update the "en-US" in
-//the line below to match the UICulture setting in the project file.
-
-//[assembly: NeutralResourcesLanguage("en-US", UltimateResourceFallbackLocation.Satellite)]
-
-
+// WPF ThemeInfo - required for WPF applications
 [assembly: ThemeInfo(
     ResourceDictionaryLocation.None, //where theme specific resource dictionaries are located
                                      //(used if a resource is not found in the page,
@@ -38,7 +35,6 @@ using System.Windows;
                                               // app, or any theme specific resource dictionaries)
 )]
 
-
 // Version information for an assembly consists of the following four values:
 //
 //      Major Version
@@ -46,8 +42,5 @@ using System.Windows;
 //      Build Number
 //      Revision
 //
-// You can specify all the values or you can default the Build and Revision Numbers
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]

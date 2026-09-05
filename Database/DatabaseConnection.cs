@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Reflection;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
@@ -7,7 +7,7 @@ namespace SPTC_APPLICATION.Database
 {
     public class DatabaseConnection
     {
-        private static string connectionString;
+        private static string? connectionString;
 
         public DatabaseConnection(string connectionString)
         {
@@ -16,17 +16,17 @@ namespace SPTC_APPLICATION.Database
 
         public static MySqlConnection GetConnection()
         {
-            MySqlConnection connection = new MySqlConnection(DatabaseConnection.connectionString);
-            return connection;
+            // .NET 8: connectionString may be null if not initialized; guard against it
+            return new MySqlConnection(DatabaseConnection.connectionString ?? string.Empty);
         }
 
         public static string GetEnumDescription(ConnectionLogs value)
         {
-            FieldInfo fieldInfo = value.GetType().GetField(value.ToString());
+            FieldInfo? fieldInfo = value.GetType().GetField(value.ToString());
 
-            DescriptionAttribute[] attributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+            DescriptionAttribute[]? attributes = (DescriptionAttribute[]?)fieldInfo?.GetCustomAttributes(typeof(DescriptionAttribute), false);
 
-            return attributes.Length > 0 ? attributes[0].Description : value.ToString();
+            return attributes != null && attributes.Length > 0 ? attributes[0].Description : value.ToString();
         }
 
         public class Builder
@@ -40,7 +40,6 @@ namespace SPTC_APPLICATION.Database
                 //connectionString = $"Server={host};Port={port};Database={database};Uid={username};Pwd={password};";
                 connectionString = $"Server={host};Database={database};Uid={username};Pwd={password};";
             }
-
 
             public async Task<bool> CreateAsync()
             {

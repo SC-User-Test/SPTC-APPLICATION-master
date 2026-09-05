@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using SPTC_APPLICATION.View;
@@ -41,7 +41,11 @@ namespace SPTC_APPLICATION.Objects
             {
                 try
                 {
-                    Directory.CreateDirectory(Path.GetDirectoryName(LogFilePath));
+                    string? dirPath = Path.GetDirectoryName(LogFilePath);
+                    if (!string.IsNullOrEmpty(dirPath))
+                    {
+                        Directory.CreateDirectory(dirPath);
+                    }
                     File.Create(LogFilePath).Close();
                 }
                 catch (Exception ex)
@@ -50,8 +54,6 @@ namespace SPTC_APPLICATION.Objects
                 }
             }
         }
-
-
     }
 
     public static class StringExtensions
@@ -63,7 +65,7 @@ namespace SPTC_APPLICATION.Objects
 
             int count = 1;
             int position = 0;
-            while ((position = text.IndexOf(Environment.NewLine, position)) != -1)
+            while ((position = text.IndexOf(Environment.NewLine, position, StringComparison.Ordinal)) != -1)
             {
                 count++;
                 position += Environment.NewLine.Length;
@@ -72,6 +74,4 @@ namespace SPTC_APPLICATION.Objects
             return count;
         }
     }
-
-
 }

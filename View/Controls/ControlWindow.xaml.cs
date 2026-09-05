@@ -1,4 +1,3 @@
-﻿using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -23,9 +22,9 @@ namespace SPTC_APPLICATION.View
             control.Show();
             return control;
         }
+
         public static ControlWindow ShowDialog(string header, string content, Icons icons = Icons.DEFAULT)
         {
-            
             ControlWindow control = new ControlWindow();
             control.SetIcon(icons);
             control.lblHeader.Content = header;

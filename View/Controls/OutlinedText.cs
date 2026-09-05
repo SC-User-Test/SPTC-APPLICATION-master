@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
@@ -79,8 +79,8 @@ namespace SPTC_APPLICATION.View
             typeof(OutlinedTextBlock),
             new FrameworkPropertyMetadata(TextWrapping.NoWrap, OnFormattedTextUpdated));
 
-        private FormattedText formattedText;
-        private Geometry textGeometry;
+        private FormattedText? formattedText;
+        private Geometry? textGeometry;
 
         public OutlinedTextBlock()
         {
@@ -180,7 +180,7 @@ namespace SPTC_APPLICATION.View
             // constrain the formatted text according to the available size
             // the Math.Min call is important - without this constraint (which seems arbitrary, but is the maximum allowable text width), things blow up when availableSize is infinite in both directions
             // the Math.Max call is to ensure we don't hit zero, which will cause MaxTextHeight to throw
-            this.formattedText.MaxTextWidth = Math.Min(3579139, availableSize.Width);
+            this.formattedText!.MaxTextWidth = Math.Min(3579139, availableSize.Width);
             this.formattedText.MaxTextHeight = Math.Max(0.0001d, availableSize.Height);
 
             // return the desired size
@@ -192,7 +192,7 @@ namespace SPTC_APPLICATION.View
             this.EnsureFormattedText();
 
             // update the formatted text with the final size
-            this.formattedText.MaxTextWidth = finalSize.Width;
+            this.formattedText!.MaxTextWidth = finalSize.Width;
             this.formattedText.MaxTextHeight = finalSize.Height;
 
             // need to re-generate the geometry now that the dimensions have changed
@@ -221,7 +221,6 @@ namespace SPTC_APPLICATION.View
             outlinedTextBlock.InvalidateVisual();
         }
 
-        [Obsolete]
         private void EnsureFormattedText()
         {
             if (this.formattedText != null || this.Text == null)
@@ -229,13 +228,18 @@ namespace SPTC_APPLICATION.View
                 return;
             }
 
+            // .NET 8 / WPF: Use the non-obsolete FormattedText constructor that requires pixelsPerDip.
+            // VisualTreeHelper.GetDpi() provides the correct DPI for the current visual.
+            double pixelsPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
+
             this.formattedText = new FormattedText(
                 this.Text,
                 CultureInfo.CurrentUICulture,
                 this.FlowDirection,
                 new Typeface(this.FontFamily, this.FontStyle, this.FontWeight, FontStretches.Normal),
                 this.FontSize,
-                Brushes.Black);
+                Brushes.Black,
+                pixelsPerDip);
 
             this.UpdateFormattedText();
         }
@@ -267,7 +271,7 @@ namespace SPTC_APPLICATION.View
             }
 
             this.EnsureFormattedText();
-            this.textGeometry = this.formattedText.BuildGeometry(new Point(0, 0));
+            this.textGeometry = this.formattedText!.BuildGeometry(new Point(0, 0));
         }
     }
 }

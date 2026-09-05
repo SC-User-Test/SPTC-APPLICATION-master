@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -13,31 +13,33 @@ namespace SPTC_APPLICATION.Database
 
         public static string GetEnumDescription(CRUDControl value)
         {
-            FieldInfo fieldInfo = value.GetType().GetField(value.ToString());
+            FieldInfo? fieldInfo = value.GetType().GetField(value.ToString());
 
-            DescriptionAttribute[] attributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+            DescriptionAttribute[]? attributes = (DescriptionAttribute[]?)fieldInfo?.GetCustomAttributes(typeof(DescriptionAttribute), false);
 
-            return attributes.Length > 0 ? attributes[0].Description : value.ToString();
+            return attributes != null && attributes.Length > 0 ? attributes[0].Description : value.ToString();
         }
 
+        /// <summary>
+        /// Hashes the input string using MD5.
+        /// NOTE: MD5 is not cryptographically secure for password storage.
+        /// Consider migrating to BCrypt or SHA-256 with salt for new implementations.
+        /// MD5.HashData() is the preferred .NET 8 API (no need to dispose).
+        /// </summary>
         public static string Protect(string input)
         {
-            using (MD5 md5 = MD5.Create())
+            // .NET 8: Use MD5.HashData() static method - no need to create/dispose instance
+            byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+            byte[] hashBytes = MD5.HashData(inputBytes);
+
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int i = 0; i < hashBytes.Length; i++)
             {
-                byte[] inputBytes = Encoding.UTF8.GetBytes(input);
-                byte[] hashBytes = md5.ComputeHash(inputBytes);
-
-                StringBuilder stringBuilder = new StringBuilder();
-                for (int i = 0; i < hashBytes.Length; i++)
-                {
-                    stringBuilder.Append(hashBytes[i].ToString("x2"));
-                }
-
-                return stringBuilder.ToString();
+                stringBuilder.Append(hashBytes[i].ToString("x2"));
             }
+
+            return stringBuilder.ToString();
         }
-
-
     }
 
     public static class Table
@@ -56,12 +58,13 @@ namespace SPTC_APPLICATION.Database
         public static string LONG_TERM_LOAN = "tbl_long_term_loan_ledger";
         public static string VIOLATION_TYPE = "tbl_violation_type";
         public static string VIOLATION = "tbl_violation";
-
     }
+
     public static class Select
     {
         public static string ALL = "*";
     }
+
     public static class Where
     {
         public static string ALL = "1";
@@ -71,6 +74,7 @@ namespace SPTC_APPLICATION.Database
         public static string ID_NOTDELETED = "id=? AND isDeleted=0";
         public static string ID_DELETED = "id=? AND isDeleted=1";
     }
+
     public static class Field
     {
         // ALL
@@ -160,7 +164,7 @@ namespace SPTC_APPLICATION.Database
         public static string MONTHLY_PRINCIPAL = "monthly_principal";
         public static string PAYMENT_DUES = "payment_dues";
 
-        // SHARECAPITAL 
+        // SHARECAPITAL
         public static string BEGINNING_BALANCE = "beginning_balance";
         public static string LAST_BALANCE = "last_balance";
 
@@ -182,7 +186,6 @@ namespace SPTC_APPLICATION.Database
 
     public enum CRUDControl
     {
-
         [Description("LOGIN FAILED")]
         LOGIN_FAILED,
 
@@ -191,6 +194,5 @@ namespace SPTC_APPLICATION.Database
 
         [Description("TRY AGAIN")]
         TRY_AGAIN,
-
     }
 }
