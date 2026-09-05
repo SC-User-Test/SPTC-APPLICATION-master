@@ -3,7 +3,6 @@ using System.Windows;
 using SPTC_APPLICATION.Objects;
 using SPTC_APPLICATION.View.Pages;
 using SPTC_APPLICATION.View;
-using SPTC_APPLICATION.View.IDGenerator.Previews;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.IO;

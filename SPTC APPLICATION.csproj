@@ -1,6 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!-- Exclude Tests directory from main project compilation -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Tests\**" />
+    <None Remove="Tests\**" />
+    <Content Remove="Tests\**" />
+    <EmbeddedResource Remove="Tests\**" />
+  </ItemGroup>
+
+  <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <!-- Updated from net6.0-windows / .NET Framework 4.8 to net8.0-windows for .NET 8 compatibility -->
     <TargetFramework>net8.0-windows</TargetFramework>
@@ -18,6 +29,8 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <!-- Suppress platform compatibility warnings for Windows-only APIs -->
     <NoWarn>$(NoWarn);CA1416</NoWarn>
+    <!-- Enable Windows targeting for cross-platform build environments -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
@@ -130,14 +143,6 @@
 
     <!-- ZstdSharp.Port: Updated to 0.7.4 for .NET 8 compatibility -->
     <PackageReference Include="ZstdSharp.Port" Version="0.7.4" />
-  </ItemGroup>
-
-  <!-- Explicitly include files that SDK-style projects auto-include but need special treatment -->
-  <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </ApplicationDefinition>
   </ItemGroup>
 
   <!-- Settings file support -->
