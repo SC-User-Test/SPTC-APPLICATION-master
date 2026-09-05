@@ -1,5 +1,5 @@
-﻿using System.Linq;
-using MySql.Data.MySqlClient;
+using System.Linq;
+using Npgsql;
 using SPTC_APPLICATION.Database;
 
 namespace SPTC_APPLICATION.Objects
@@ -29,7 +29,7 @@ namespace SPTC_APPLICATION.Objects
 
 
 
-        public Franchise(MySqlDataReader reader)
+        public Franchise(NpgsqlDataReader reader)
         {
             Operator = null;
             Driver_day = null;
@@ -48,15 +48,15 @@ namespace SPTC_APPLICATION.Objects
         private void Populate(int operatorID, int driverDayID, int driverNightID, int nameID, int lastFranchiseID)
         {
             if (operatorID >= 0)
-                this.Operator = (Retrieve.GetData<Operator>(Table.OPERATOR, Select.ALL, Where.ID_, new MySqlParameter("id", operatorID))).FirstOrDefault();
+                this.Operator = (Retrieve.GetData<Operator>(Table.OPERATOR, Select.ALL, Where.ID_, new NpgsqlParameter("id", operatorID))).FirstOrDefault();
             if (driverDayID >= 0)
-                this.Driver_day = (Retrieve.GetData<Driver>(Table.DRIVER, Select.ALL, Where.ID_, new MySqlParameter("id", driverDayID))).FirstOrDefault();
+                this.Driver_day = (Retrieve.GetData<Driver>(Table.DRIVER, Select.ALL, Where.ID_, new NpgsqlParameter("id", driverDayID))).FirstOrDefault();
             if (driverNightID >= 0)
-                this.Driver_night = (Retrieve.GetData<Driver>(Table.DRIVER, Select.ALL, Where.ID_, new MySqlParameter("id", driverNightID))).FirstOrDefault();
+                this.Driver_night = (Retrieve.GetData<Driver>(Table.DRIVER, Select.ALL, Where.ID_, new NpgsqlParameter("id", driverNightID))).FirstOrDefault();
             if (nameID >= 0)
-                this.owner = (Retrieve.GetData<Name>(Table.NAME, Select.ALL, Where.ID_, new MySqlParameter("id", nameID))).FirstOrDefault();
+                this.owner = (Retrieve.GetData<Name>(Table.NAME, Select.ALL, Where.ID_, new NpgsqlParameter("id", nameID))).FirstOrDefault();
             if (lastFranchiseID >= 0)
-                this.lastFranchiseId = (Retrieve.GetData<Franchise>(Table.FRANCHISE, Select.ALL, Where.ID_, new MySqlParameter("id", lastFranchiseID))).FirstOrDefault();
+                this.lastFranchiseId = (Retrieve.GetData<Franchise>(Table.FRANCHISE, Select.ALL, Where.ID_, new NpgsqlParameter("id", lastFranchiseID))).FirstOrDefault();
         }
 
         public bool WriteInto(string bodynumber, Operator lOperator, Driver lDriverDay, Driver lDriverNight, string licenceNO)

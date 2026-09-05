@@ -90,13 +90,11 @@
     <PackageReference Include="K4os.Hash.xxHash" Version="1.0.8" />
 
     <!--
-      MySql.Data: Updated from 8.1.0 to 8.3.0 for full .NET 8 support.
-      NOTE: This project uses MySql.Data directly (not Entity Framework Core).
-      The analysis report flagged Microsoft.EntityFrameworkCore 6.0.0 as incompatible,
-      but this project does not use EF Core - it uses raw MySql.Data ADO.NET access.
-      MySql.Data 8.3.0 is fully compatible with .NET 8.
+      Database Provider: Migrated from MySql.Data (MySQL) to Npgsql 8.0.5 (PostgreSQL 16).
+      Npgsql is the official open-source .NET data provider for PostgreSQL.
+      All ADO.NET types (Connection, Command, DataReader, Parameter, Exception) updated.
     -->
-    <PackageReference Include="MySql.Data" Version="8.3.0" />
+    <PackageReference Include="Npgsql" Version="8.0.5" />
 
     <!-- Newtonsoft.Json: Updated to 13.0.3 for .NET 8 compatibility -->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

@@ -1,30 +1,30 @@
-﻿using MySql.Data.MySqlClient;
+using Npgsql;
 
 namespace SPTC_APPLICATION.Database
 {
     public class Clean
     {
+        // PostgreSQL uses "DELETE FROM table WHERE condition" (no asterisk)
+        private string CLEANER = "DELETE FROM ";
 
-        private string CLEANER = "DELETE * FROM ";
         public Clean(string table)
         {
-            CLEANER += table + " " + Where.ALL_DELETED;
+            CLEANER += table + " WHERE " + Where.ALL_DELETED;
         }
 
         public bool Start()
         {
             if (AppState.IS_ADMIN)
             {
-                using (MySqlConnection connection = DatabaseConnection.GetConnection())
+                using (NpgsqlConnection connection = DatabaseConnection.GetConnection())
                 {
                     connection.Open();
-                    MySqlCommand command = new MySqlCommand(CLEANER, connection);
-                    command.ExecuteReader();
+                    NpgsqlCommand command = new NpgsqlCommand(CLEANER, connection);
+                    command.ExecuteNonQuery();
                 }
                 return true;
             }
             return false;
         }
-
     }
 }

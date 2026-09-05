@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Linq;
-using MySql.Data.MySqlClient;
+using Npgsql;
 using SPTC_APPLICATION.Database;
 
 namespace SPTC_APPLICATION.Objects
@@ -29,7 +29,7 @@ namespace SPTC_APPLICATION.Objects
             mOperator = new Upsert(Table.OPERATOR, -1);
         }
 
-        public Operator(MySqlDataReader reader)
+        public Operator(NpgsqlDataReader reader)
         {
             mOperator = null;
             this.id = Retrieve.GetValueOrDefault<int>(reader, Field.ID);
@@ -44,13 +44,13 @@ namespace SPTC_APPLICATION.Objects
         private void Populate(int lname, int laddress, int limage, int lsignature)
         {
             if (lname >= 0)
-                this.name = (Retrieve.GetData<Name>(Table.NAME, Select.ALL, Where.ID_, new MySqlParameter("id", lname))).FirstOrDefault();
+                this.name = (Retrieve.GetData<Name>(Table.NAME, Select.ALL, Where.ID_, new NpgsqlParameter("id", lname))).FirstOrDefault();
             if (laddress >= 0)
-                this.address = (Retrieve.GetData<Address>(Table.ADDRESS, Select.ALL, Where.ID_, new MySqlParameter("id", laddress))).FirstOrDefault();
+                this.address = (Retrieve.GetData<Address>(Table.ADDRESS, Select.ALL, Where.ID_, new NpgsqlParameter("id", laddress))).FirstOrDefault();
             if (limage >= 0)
-                this.image = (Retrieve.GetData<Image>(Table.IMAGE, Select.ALL, Where.ID_, new MySqlParameter("id", limage))).FirstOrDefault();
+                this.image = (Retrieve.GetData<Image>(Table.IMAGE, Select.ALL, Where.ID_, new NpgsqlParameter("id", limage))).FirstOrDefault();
             if (lsignature >= 0)
-                this.signature = (Retrieve.GetData<Image>(Table.IMAGE, Select.ALL, Where.ID_, new MySqlParameter("id", lsignature))).FirstOrDefault();
+                this.signature = (Retrieve.GetData<Image>(Table.IMAGE, Select.ALL, Where.ID_, new NpgsqlParameter("id", lsignature))).FirstOrDefault();
         }
 
         public bool WriteInto(Name name, Address address, Image image, Image sign, string remarks, DateTime datetime, string emergencyPerson, string emergencyContact)

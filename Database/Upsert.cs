@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using MySql.Data.MySqlClient;
+using Npgsql;
 using SPTC_APPLICATION.Objects;
 
 namespace SPTC_APPLICATION.Database
@@ -70,14 +70,14 @@ namespace SPTC_APPLICATION.Database
             Dictionary<string, object> result = new Dictionary<string, object>();
             try
             {
-                using (MySqlConnection connection = DatabaseConnection.GetConnection())
+                using (NpgsqlConnection connection = DatabaseConnection.GetConnection())
                 {
                     connection.Open();
                     string query = $"SELECT * FROM {tableName} WHERE id = @id";
-                    MySqlCommand command = new MySqlCommand(query, connection);
+                    NpgsqlCommand command = new NpgsqlCommand(query, connection);
                     command.Parameters.AddWithValue("@id", id);
 
-                    using (MySqlDataReader reader = command.ExecuteReader())
+                    using (NpgsqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
                         {
@@ -91,7 +91,7 @@ namespace SPTC_APPLICATION.Database
                     }
                 }
             }
-            catch (MySqlException ex)
+            catch (NpgsqlException ex)
             {
                 EventLogger.Post($"DTB :: Exception : {ex.Message}");
             }
@@ -103,35 +103,40 @@ namespace SPTC_APPLICATION.Database
         {
             try
             {
-                using (MySqlConnection connection = DatabaseConnection.GetConnection())
+                using (NpgsqlConnection connection = DatabaseConnection.GetConnection())
                 {
                     connection.Open();
                     string columns = string.Join(", ", fieldValues.Keys);
                     string values = string.Join(", ", fieldValues.Keys.Select(key => "@" + key));
 
-                    string query = $"INSERT INTO {tableName} ({columns}) VALUES ({values})";
-                    MySqlCommand command = new MySqlCommand(query, connection);
+                    // PostgreSQL: Use RETURNING id to get the auto-generated primary key
+                    string query = $"INSERT INTO {tableName} ({columns}) VALUES ({values}) RETURNING id";
+                    NpgsqlCommand command = new NpgsqlCommand(query, connection);
 
                     foreach (var entry in fieldValues)
                     {
-                        command.Parameters.AddWithValue("@" + entry.Key, entry.Value);
+                        command.Parameters.AddWithValue("@" + entry.Key, entry.Value ?? DBNull.Value);
                     }
 
                     try
                     {
-                        command.ExecuteNonQuery();
-                        id = (int)command.LastInsertedId;
+                        // ExecuteScalar returns the RETURNING id value
+                        object? result = command.ExecuteScalar();
+                        id = (result != null && result != DBNull.Value) ? Convert.ToInt32(result) : -1;
                         EventLogger.Post($"DTB :: Insert into ({tableName}) pk: {id}");
                     }
-                    catch (MySqlException ex)
+                    catch (NpgsqlException ex)
                     {
-                        if (ex.Number == 1062)
-                        { 
+                        // PostgreSQL unique violation error code: 23505
+                        if (ex.SqlState == "23505")
+                        {
                             EventLogger.Post($"DTB :: Insert Exception: Existing Duplicate: {ex.Message}");
                             if (tableName == Table.NAME)
                             {
                                 id = GetExistingRecordId(fieldValues);
-                            } else if (tableName == Table.ADDRESS) {
+                            }
+                            else if (tableName == Table.ADDRESS)
+                            {
                                 Dictionary<string, object> uniqueAttributes = new Dictionary<string, object>
                                 {
                                     { Field.ADDRESSLINE1, fieldValues[Field.ADDRESSLINE1] },
@@ -139,9 +144,9 @@ namespace SPTC_APPLICATION.Database
                                 };
 
                                 id = GetExistingRecordId(uniqueAttributes);
-
                             }
-                            else {
+                            else
+                            {
                                 id = GetExistingRecordId();
                             }
                         }
@@ -150,11 +155,9 @@ namespace SPTC_APPLICATION.Database
                             EventLogger.Post($"DTB :: Insert Exception: {ex.Message}");
                         }
                     }
-
-
                 }
             }
-            catch (MySqlException ex)
+            catch (NpgsqlException ex)
             {
                 EventLogger.Post($"DTB :: Insert Main Exception : {ex.Message}");
             }
@@ -164,49 +167,50 @@ namespace SPTC_APPLICATION.Database
         {
             try
             {
-                using (MySqlConnection connection = DatabaseConnection.GetConnection())
+                using (NpgsqlConnection connection = DatabaseConnection.GetConnection())
                 {
                     connection.Open();
 
                     string setValues = string.Join(", ", fieldValues.Keys.Select(key => $"{key} = @{key}"));
 
                     string query = $"UPDATE {tableName} SET {setValues} WHERE id=@idkey";
-                    MySqlCommand command = new MySqlCommand(query, connection);
+                    NpgsqlCommand command = new NpgsqlCommand(query, connection);
                     command.Parameters.AddWithValue("@idkey", id);
 
                     foreach (var entry in fieldValues)
                     {
-                        command.Parameters.AddWithValue("@" + entry.Key, entry.Value);
+                        command.Parameters.AddWithValue("@" + entry.Key, entry.Value ?? DBNull.Value);
                     }
 
                     command.ExecuteNonQuery();
                     EventLogger.Post($"DTB :: Update ({tableName}) pk: {id}");
                 }
             }
-            catch (MySqlException ex)
+            catch (NpgsqlException ex)
             {
                 EventLogger.Post($"DTB :: Update Main Exception : {ex.Message}");
             }
         }
+
         private int GetExistingRecordId(Dictionary<string, object> uniqueAttributes = null)
         {
             try
             {
-                using (MySqlConnection connection = DatabaseConnection.GetConnection())
+                using (NpgsqlConnection connection = DatabaseConnection.GetConnection())
                 {
                     connection.Open();
-                    MySqlCommand command;
+                    NpgsqlCommand command;
                     if (uniqueAttributes != null && uniqueAttributes.Count > 0)
                     {
                         // Handle tables with unique sets
                         string whereClause = string.Join(" AND ", uniqueAttributes.Keys.Select(key => $"{key} = @{key}"));
                         string query = $"SELECT id FROM {tableName} WHERE {whereClause}";
-                        command = new MySqlCommand(query, connection);
+                        command = new NpgsqlCommand(query, connection);
 
                         // Add parameters for each field in the unique set
                         foreach (var kvp in uniqueAttributes)
                         {
-                            command.Parameters.AddWithValue($"@{kvp.Key}", kvp.Value);
+                            command.Parameters.AddWithValue($"@{kvp.Key}", kvp.Value ?? DBNull.Value);
                         }
                     }
                     else
@@ -214,8 +218,8 @@ namespace SPTC_APPLICATION.Database
                         // Handle tables without unique sets
                         string uniqueAttribute = GetUniqueAttributeName();
                         string query = $"SELECT id FROM {tableName} WHERE {uniqueAttribute} = @{uniqueAttribute}";
-                        command = new MySqlCommand(query, connection);
-                        command.Parameters.AddWithValue($"@{uniqueAttribute}", fieldValues[uniqueAttribute]);
+                        command = new NpgsqlCommand(query, connection);
+                        command.Parameters.AddWithValue($"@{uniqueAttribute}", fieldValues[uniqueAttribute] ?? DBNull.Value);
                     }
 
                     object result = command.ExecuteScalar();
@@ -223,7 +227,7 @@ namespace SPTC_APPLICATION.Database
                     return (result != null && result != DBNull.Value) ? Convert.ToInt32(result) : -1;
                 }
             }
-            catch (MySqlException ex)
+            catch (NpgsqlException ex)
             {
                 EventLogger.Post($"DTB :: Existing Record Exception : {ex.Message}");
             }
@@ -239,6 +243,5 @@ namespace SPTC_APPLICATION.Database
 
             return fieldValues.Keys.FirstOrDefault();
         }
-
     }
 }

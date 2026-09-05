@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Linq;
-using MySql.Data.MySqlClient;
+using Npgsql;
 using SPTC_APPLICATION.Database;
 
 namespace SPTC_APPLICATION.Objects
@@ -27,7 +27,7 @@ namespace SPTC_APPLICATION.Objects
             image = null;
             position = null;
         }
-        public Employee(MySqlDataReader reader)
+        public Employee(NpgsqlDataReader reader)
         {
             name = null;
             address = null;
@@ -44,10 +44,10 @@ namespace SPTC_APPLICATION.Objects
         }
         private void Populate(int name, int address, int image, int position)
         {
-            this.name = (Retrieve.GetData<Name>(Table.NAME, Select.ALL, Where.ID_, new MySqlParameter("id", name))).FirstOrDefault();
-            this.address = (Retrieve.GetData<Address>(Table.ADDRESS, Select.ALL, Where.ID_, new MySqlParameter("id", address))).FirstOrDefault();
-            this.image = (Retrieve.GetData<Image>(Table.IMAGE, Select.ALL, Where.ID_, new MySqlParameter("id", image))).FirstOrDefault();
-            this.position = (Retrieve.GetData<Position>(Table.POSITION, Select.ALL, Where.ID_, new MySqlParameter("id", position))).FirstOrDefault();
+            this.name = (Retrieve.GetData<Name>(Table.NAME, Select.ALL, Where.ID_, new NpgsqlParameter("id", name))).FirstOrDefault();
+            this.address = (Retrieve.GetData<Address>(Table.ADDRESS, Select.ALL, Where.ID_, new NpgsqlParameter("id", address))).FirstOrDefault();
+            this.image = (Retrieve.GetData<Image>(Table.IMAGE, Select.ALL, Where.ID_, new NpgsqlParameter("id", image))).FirstOrDefault();
+            this.position = (Retrieve.GetData<Position>(Table.POSITION, Select.ALL, Where.ID_, new NpgsqlParameter("id", position))).FirstOrDefault();
         }
         public int Save()
         {

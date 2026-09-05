@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Reflection;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
+using Npgsql;
 
 namespace SPTC_APPLICATION.Database
 {
@@ -14,10 +14,10 @@ namespace SPTC_APPLICATION.Database
             DatabaseConnection.connectionString = connectionString;
         }
 
-        public static MySqlConnection GetConnection()
+        public static NpgsqlConnection GetConnection()
         {
             // .NET 8: connectionString may be null if not initialized; guard against it
-            return new MySqlConnection(DatabaseConnection.connectionString ?? string.Empty);
+            return new NpgsqlConnection(DatabaseConnection.connectionString ?? string.Empty);
         }
 
         public static string GetEnumDescription(ConnectionLogs value)
@@ -37,8 +37,8 @@ namespace SPTC_APPLICATION.Database
 
             public Builder(string host, string port, string database, string username, string password)
             {
-                //connectionString = $"Server={host};Port={port};Database={database};Uid={username};Pwd={password};";
-                connectionString = $"Server={host};Database={database};Uid={username};Pwd={password};";
+                // PostgreSQL connection string format using Npgsql
+                connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};";
             }
 
             public async Task<bool> CreateAsync()
@@ -49,21 +49,23 @@ namespace SPTC_APPLICATION.Database
                     {
                         DatabaseConnection connection = new DatabaseConnection(connectionString);
 
-                        MySqlConnection mySqlConnection = DatabaseConnection.GetConnection();
-                        await mySqlConnection.OpenAsync();
+                        NpgsqlConnection npgsqlConnection = DatabaseConnection.GetConnection();
+                        await npgsqlConnection.OpenAsync();
                         await Task.Delay(1000);
-                        mySqlConnection.Close();
+                        npgsqlConnection.Close();
 
                         Log = ConnectionLogs.ESTABLISHED;
                         return true;
                     }
-                    catch (MySqlException ex)
+                    catch (NpgsqlException ex)
                     {
-                        if (ex.Number == 1045)
+                        // PostgreSQL error codes: 28P01 = invalid_password, 3D000 = invalid_catalog_name
+                        // 08001 = sqlclient_unable_to_establish_sqlconnection
+                        if (ex.SqlState == "28P01" || ex.SqlState == "28000")
                         {
                             Log = ConnectionLogs.WRONG_PASSWORD;
                         }
-                        else if (ex.Number == 1042)
+                        else if (ex.SqlState == "08001" || ex.SqlState == "08006" || ex.SqlState == "08000")
                         {
                             Log = ConnectionLogs.CANNOT_CONNECT;
                         }
@@ -89,20 +91,20 @@ namespace SPTC_APPLICATION.Database
                     {
                         DatabaseConnection connection = new DatabaseConnection(connectionString);
 
-                        MySqlConnection mySqlConnection = DatabaseConnection.GetConnection();
-                        mySqlConnection.Open();
-                        mySqlConnection.Close();
+                        NpgsqlConnection npgsqlConnection = DatabaseConnection.GetConnection();
+                        npgsqlConnection.Open();
+                        npgsqlConnection.Close();
 
                         Log = ConnectionLogs.ESTABLISHED;
                         return true;
                     }
-                    catch (MySqlException ex)
+                    catch (NpgsqlException ex)
                     {
-                        if (ex.Number == 1045)
+                        if (ex.SqlState == "28P01" || ex.SqlState == "28000")
                         {
                             Log = ConnectionLogs.WRONG_PASSWORD;
                         }
-                        else if (ex.Number == 1042)
+                        else if (ex.SqlState == "08001" || ex.SqlState == "08006" || ex.SqlState == "08000")
                         {
                             Log = ConnectionLogs.CANNOT_CONNECT;
                         }

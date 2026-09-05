@@ -1,5 +1,5 @@
-﻿using System;
-using MySql.Data.MySqlClient;
+using System;
+using Npgsql;
 using SPTC_APPLICATION.Database;
 
 namespace SPTC_APPLICATION.Objects
@@ -24,7 +24,7 @@ namespace SPTC_APPLICATION.Objects
                 loan = new Upsert(Table.LOAN, -1);
             }
 
-            public Loan(MySqlDataReader reader)
+            public Loan(NpgsqlDataReader reader)
             {
                 loan = null;
                 this.id = Retrieve.GetValueOrDefault<int>(reader, Field.ID);
@@ -103,7 +103,7 @@ namespace SPTC_APPLICATION.Objects
                 shareCapital = new Upsert(Table.SHARE_CAPITAL, -1);
             }
 
-            public ShareCapital(MySqlDataReader reader)
+            public ShareCapital(NpgsqlDataReader reader)
             {
                 shareCapital = null;
                 this.id = Retrieve.GetValueOrDefault<int>(reader, Field.ID);
@@ -175,7 +175,7 @@ namespace SPTC_APPLICATION.Objects
                 longTermLoan = new Upsert(Table.LONG_TERM_LOAN, -1);
             }
 
-            public LongTermLoan(MySqlDataReader reader)
+            public LongTermLoan(NpgsqlDataReader reader)
             {
                 longTermLoan = null;
                 this.id = Retrieve.GetValueOrDefault<int>(reader, Field.ID);

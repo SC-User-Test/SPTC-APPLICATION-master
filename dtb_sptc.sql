@@ -1,507 +1,282 @@
--- phpMyAdmin SQL Dump
--- version 5.2.0
--- https://www.phpmyadmin.net/
+-- PostgreSQL Schema Dump
+-- Converted from MySQL/MariaDB (phpMyAdmin SQL Dump v5.2.0)
+-- Original Server: MariaDB 10.4.27
+-- Target: PostgreSQL 16
 --
--- Host: 127.0.0.1
--- Generation Time: Sep 01, 2023 at 02:53 AM
--- Server version: 10.4.27-MariaDB
--- PHP Version: 8.2.0
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
---
--- Database: `dtb_sptc`
+-- Database: dtb_sptc
 --
 
 -- --------------------------------------------------------
-
---
--- Table structure for table `tbl_address`
---
-
-CREATE TABLE `tbl_address` (
-  `id` int(11) NOT NULL,
-  `address_line1` varchar(255) DEFAULT NULL,
-  `address_line2` varchar(255) DEFAULT NULL,
-  `house_no` varchar(255) DEFAULT NULL,
-  `street_name` varchar(50) DEFAULT NULL,
-  `barangay_subdivision` varchar(50) DEFAULT NULL,
-  `city_municipality` varchar(50) DEFAULT NULL,
-  `postal_code` varchar(10) DEFAULT NULL,
-  `province` varchar(50) DEFAULT NULL,
-  `country` varchar(50) DEFAULT NULL,
-  `isDeleted` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- Set search path to public schema
+-- --------------------------------------------------------
+SET search_path TO public;
 
 -- --------------------------------------------------------
-
---
--- Table structure for table `tbl_driver`
---
-
-CREATE TABLE `tbl_driver` (
-  `id` int(11) NOT NULL,
-  `name_id` int(11) DEFAULT -1,
-  `address_id` int(11) NOT NULL DEFAULT -1,
-  `image_id` int(11) NOT NULL DEFAULT -1,
-  `sign_id` int(11) DEFAULT -1,
-  `remarks` varchar(255) DEFAULT NULL,
-  `date_of_birth` date NOT NULL DEFAULT current_timestamp(),
-  `contact_no` varchar(11) DEFAULT NULL,
-  `emergency_person` varchar(255) DEFAULT NULL,
-  `emergency_number` varchar(11) DEFAULT NULL,
-  `isDayShift` tinyint(1) NOT NULL DEFAULT 1,
-  `isDeleted` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
+-- Table structure for table tbl_address
 -- --------------------------------------------------------
 
---
--- Table structure for table `tbl_employee`
---
+CREATE TABLE tbl_address (
+  id SERIAL PRIMARY KEY,
+  address_line1 VARCHAR(255) DEFAULT NULL,
+  address_line2 VARCHAR(255) DEFAULT NULL,
+  house_no VARCHAR(255) DEFAULT NULL,
+  street_name VARCHAR(50) DEFAULT NULL,
+  barangay_subdivision VARCHAR(50) DEFAULT NULL,
+  city_municipality VARCHAR(50) DEFAULT NULL,
+  postal_code VARCHAR(10) DEFAULT NULL,
+  province VARCHAR(50) DEFAULT NULL,
+  country VARCHAR(50) DEFAULT NULL,
+  "isDeleted" SMALLINT NOT NULL DEFAULT 0
+);
 
-CREATE TABLE `tbl_employee` (
-  `id` int(11) NOT NULL,
-  `name_id` int(11) NOT NULL DEFAULT -1,
-  `address_id` int(11) NOT NULL DEFAULT -1,
-  `image_id` int(11) NOT NULL DEFAULT -1,
-  `password` varchar(50) DEFAULT NULL,
-  `position_id` int(11) NOT NULL DEFAULT -1,
-  `start_date` date DEFAULT current_timestamp(),
-  `end_date` date DEFAULT NULL,
-  `date_of_birth` date DEFAULT NULL,
-  `contact_no` varchar(20) DEFAULT NULL,
-  `isDeleted` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- --------------------------------------------------------
+-- Table structure for table tbl_driver
+-- --------------------------------------------------------
 
---
--- Dumping data for table `tbl_employee`
---
+CREATE TABLE tbl_driver (
+  id SERIAL PRIMARY KEY,
+  name_id INTEGER DEFAULT -1,
+  address_id INTEGER NOT NULL DEFAULT -1,
+  image_id INTEGER NOT NULL DEFAULT -1,
+  sign_id INTEGER DEFAULT -1,
+  remarks VARCHAR(255) DEFAULT NULL,
+  date_of_birth DATE NOT NULL DEFAULT CURRENT_DATE,
+  contact_no VARCHAR(11) DEFAULT NULL,
+  emergency_person VARCHAR(255) DEFAULT NULL,
+  emergency_number VARCHAR(11) DEFAULT NULL,
+  "isDayShift" SMALLINT NOT NULL DEFAULT 1,
+  "isDeleted" SMALLINT NOT NULL DEFAULT 0
+);
 
-INSERT INTO `tbl_employee` (`id`, `name_id`, `address_id`, `image_id`, `password`, `position_id`, `start_date`, `end_date`, `date_of_birth`, `contact_no`, `isDeleted`) VALUES
+-- --------------------------------------------------------
+-- Table structure for table tbl_employee
+-- --------------------------------------------------------
+
+CREATE TABLE tbl_employee (
+  id SERIAL PRIMARY KEY,
+  name_id INTEGER NOT NULL DEFAULT -1,
+  address_id INTEGER NOT NULL DEFAULT -1,
+  image_id INTEGER NOT NULL DEFAULT -1,
+  password VARCHAR(50) DEFAULT NULL,
+  position_id INTEGER NOT NULL DEFAULT -1,
+  start_date DATE DEFAULT CURRENT_DATE,
+  end_date DATE DEFAULT NULL,
+  date_of_birth DATE DEFAULT NULL,
+  contact_no VARCHAR(20) DEFAULT NULL,
+  "isDeleted" SMALLINT NOT NULL DEFAULT 0
+);
+
+-- --------------------------------------------------------
+-- Seed data for tbl_employee
+-- --------------------------------------------------------
+
+INSERT INTO tbl_employee (id, name_id, address_id, image_id, password, position_id, start_date, end_date, date_of_birth, contact_no, "isDeleted") VALUES
 (1, 1, -1, -1, '751cb3f4aa17c36186f4856c8982bf27', 1, '2023-06-26', NULL, NULL, NULL, 0),
 (2, -1, -1, -1, '751cb3f4aa17c36186f4856c8982bf27', 2, '2023-06-26', NULL, NULL, NULL, 0),
 (3, -1, -1, -1, '751cb3f4aa17c36186f4856c8982bf27', 3, '2023-06-26', NULL, NULL, NULL, 0),
 (4, -1, -1, -1, '751cb3f4aa17c36186f4856c8982bf27', 4, '2023-06-26', NULL, NULL, NULL, 0);
 
--- --------------------------------------------------------
-
---
--- Table structure for table `tbl_franchise`
---
-
-CREATE TABLE `tbl_franchise` (
-  `id` int(11) NOT NULL,
-  `body_number` int(11) NOT NULL DEFAULT -1,
-  `operator_id` int(11) NOT NULL DEFAULT -1,
-  `driver_day_id` int(11) NOT NULL DEFAULT -1,
-  `driver_night_id` int(11) NOT NULL DEFAULT -1,
-  `owner_id` int(11) NOT NULL DEFAULT -1,
-  `last_franchise_id` int(11) NOT NULL DEFAULT -1,
-  `buying_date` int(11) NOT NULL DEFAULT current_timestamp(),
-  `license_no` varchar(20) DEFAULT NULL,
-  `voters_id_number` varchar(255) DEFAULT NULL,
-  `tin_number` varchar(255) DEFAULT NULL,
-  `isDeleted` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- Update sequence after manual inserts
+SELECT setval('tbl_employee_id_seq', (SELECT MAX(id) FROM tbl_employee));
 
 -- --------------------------------------------------------
-
---
--- Table structure for table `tbl_id_history`
---
-
-CREATE TABLE `tbl_id_history` (
-  `id` int(11) NOT NULL,
-  `date` date DEFAULT current_timestamp(),
-  `franchise_id` int(11) NOT NULL DEFAULT -1,
-  `entity_type` varchar(10) NOT NULL DEFAULT 'OPERATOR',
-  `name_id` int(11) NOT NULL DEFAULT -1,
-  `isDeleted` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
+-- Table structure for table tbl_franchise
 -- --------------------------------------------------------
 
---
--- Table structure for table `tbl_image`
---
-
-CREATE TABLE `tbl_image` (
-  `id` int(11) NOT NULL,
-  `image_source_bin` mediumblob DEFAULT NULL,
-  `image_name` varchar(255) DEFAULT NULL,
-  `isDeleted` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `tbl_loan_ledger`
---
-
-CREATE TABLE `tbl_loan_ledger` (
-  `id` int(11) NOT NULL,
-  `franchise_id` int(11) NOT NULL DEFAULT -1,
-  `date` date NOT NULL DEFAULT current_timestamp(),
-  `amount` double NOT NULL DEFAULT 0,
-  `details` varchar(255) DEFAULT NULL,
-  `monthly_interest` double NOT NULL DEFAULT 0,
-  `monthly_principal` double NOT NULL DEFAULT 0,
-  `payment_dues` double NOT NULL DEFAULT 0,
-  `isDeleted` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE tbl_franchise (
+  id SERIAL PRIMARY KEY,
+  body_number INTEGER NOT NULL DEFAULT -1,
+  operator_id INTEGER NOT NULL DEFAULT -1,
+  driver_day_id INTEGER NOT NULL DEFAULT -1,
+  driver_night_id INTEGER NOT NULL DEFAULT -1,
+  owner_id INTEGER NOT NULL DEFAULT -1,
+  last_franchise_id INTEGER NOT NULL DEFAULT -1,
+  buying_date INTEGER NOT NULL DEFAULT 0,
+  license_no VARCHAR(20) DEFAULT NULL,
+  voters_id_number VARCHAR(255) DEFAULT NULL,
+  tin_number VARCHAR(255) DEFAULT NULL,
+  "isDeleted" SMALLINT NOT NULL DEFAULT 0,
+  CONSTRAINT uq_franchise_body_number UNIQUE (body_number)
+);
 
 -- --------------------------------------------------------
-
---
--- Table structure for table `tbl_long_term_loan_ledger`
---
-
-CREATE TABLE `tbl_long_term_loan_ledger` (
-  `id` int(11) NOT NULL,
-  `franchise_id` int(11) NOT NULL DEFAULT -1,
-  `date` date NOT NULL DEFAULT current_timestamp(),
-  `terms_of_payment_month` int(11) NOT NULL DEFAULT 1,
-  `start_date` date DEFAULT NULL,
-  `end_date` date DEFAULT NULL,
-  `amount_loaned` double NOT NULL DEFAULT 0,
-  `details` varchar(255) DEFAULT NULL,
-  `processing_fee` double NOT NULL DEFAULT 0,
-  `capital_buildup` double NOT NULL DEFAULT 0,
-  `isDeleted` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
+-- Table structure for table tbl_id_history
 -- --------------------------------------------------------
 
---
--- Table structure for table `tbl_name`
---
-
-CREATE TABLE `tbl_name` (
-  `id` int(11) NOT NULL,
-  `prefix` varchar(50) DEFAULT NULL,
-  `first_name` varchar(50) DEFAULT NULL,
-  `middle_name` varchar(50) DEFAULT NULL,
-  `last_name` varchar(50) DEFAULT NULL,
-  `suffix` varchar(50) DEFAULT NULL,
-  `isDeleted` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE tbl_id_history (
+  id SERIAL PRIMARY KEY,
+  date DATE DEFAULT CURRENT_DATE,
+  franchise_id INTEGER NOT NULL DEFAULT -1,
+  entity_type VARCHAR(10) NOT NULL DEFAULT 'OPERATOR',
+  name_id INTEGER NOT NULL DEFAULT -1,
+  "isDeleted" SMALLINT NOT NULL DEFAULT 0
+);
 
 -- --------------------------------------------------------
-
---
--- Table structure for table `tbl_operator`
---
-
-CREATE TABLE `tbl_operator` (
-  `id` int(11) NOT NULL,
-  `name_id` int(11) DEFAULT -1,
-  `address_id` int(11) NOT NULL DEFAULT -1,
-  `image_id` int(11) NOT NULL DEFAULT -1,
-  `sign_id` int(11) DEFAULT -1,
-  `remarks` varchar(255) DEFAULT NULL,
-  `date_of_birth` date NOT NULL DEFAULT current_timestamp(),
-  `contact_no` varchar(11) DEFAULT NULL,
-  `emergency_person` varchar(255) DEFAULT NULL,
-  `emergency_number` varchar(11) DEFAULT NULL,
-  `isOwner` tinyint(1) NOT NULL DEFAULT 0,
-  `isDeleted` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
+-- Table structure for table tbl_image
 -- --------------------------------------------------------
 
---
--- Table structure for table `tbl_payment_details`
---
-
-CREATE TABLE `tbl_payment_details` (
-  `id` int(11) NOT NULL,
-  `ledger_id` int(11) NOT NULL DEFAULT -1,
-  `isDownPayment` tinyint(1) NOT NULL DEFAULT 0,
-  `ledger_type` int(11) NOT NULL DEFAULT 0,
-  `date` date NOT NULL DEFAULT current_timestamp(),
-  `reference_no` int(11) NOT NULL DEFAULT -1,
-  `deposit` double NOT NULL DEFAULT 0,
-  `penalties` double NOT NULL DEFAULT 0,
-  `remarks` varchar(255) DEFAULT NULL,
-  `isDeleted` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE tbl_image (
+  id SERIAL PRIMARY KEY,
+  -- PostgreSQL uses BYTEA instead of MySQL MEDIUMBLOB for binary data
+  image_source_bin BYTEA DEFAULT NULL,
+  image_name VARCHAR(255) DEFAULT NULL,
+  "isDeleted" SMALLINT NOT NULL DEFAULT 0,
+  CONSTRAINT uq_image_name UNIQUE (image_name)
+);
 
 -- --------------------------------------------------------
+-- Table structure for table tbl_loan_ledger
+-- --------------------------------------------------------
 
---
--- Table structure for table `tbl_position`
---
+CREATE TABLE tbl_loan_ledger (
+  id SERIAL PRIMARY KEY,
+  franchise_id INTEGER NOT NULL DEFAULT -1,
+  date DATE NOT NULL DEFAULT CURRENT_DATE,
+  amount DOUBLE PRECISION NOT NULL DEFAULT 0,
+  details VARCHAR(255) DEFAULT NULL,
+  monthly_interest DOUBLE PRECISION NOT NULL DEFAULT 0,
+  monthly_principal DOUBLE PRECISION NOT NULL DEFAULT 0,
+  payment_dues DOUBLE PRECISION NOT NULL DEFAULT 0,
+  "isDeleted" SMALLINT NOT NULL DEFAULT 0
+);
 
-CREATE TABLE `tbl_position` (
-  `id` int(11) NOT NULL,
-  `title` varchar(50) DEFAULT NULL,
-  `can_create` tinyint(1) NOT NULL DEFAULT 0,
-  `can_edit` tinyint(1) NOT NULL DEFAULT 0,
-  `can_delete` tinyint(1) NOT NULL DEFAULT 0,
-  `isDeleted` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- --------------------------------------------------------
+-- Table structure for table tbl_long_term_loan_ledger
+-- --------------------------------------------------------
 
---
--- Dumping data for table `tbl_position`
---
+CREATE TABLE tbl_long_term_loan_ledger (
+  id SERIAL PRIMARY KEY,
+  franchise_id INTEGER NOT NULL DEFAULT -1,
+  date DATE NOT NULL DEFAULT CURRENT_DATE,
+  terms_of_payment_month INTEGER NOT NULL DEFAULT 1,
+  start_date DATE DEFAULT NULL,
+  end_date DATE DEFAULT NULL,
+  amount_loaned DOUBLE PRECISION NOT NULL DEFAULT 0,
+  details VARCHAR(255) DEFAULT NULL,
+  processing_fee DOUBLE PRECISION NOT NULL DEFAULT 0,
+  capital_buildup DOUBLE PRECISION NOT NULL DEFAULT 0,
+  "isDeleted" SMALLINT NOT NULL DEFAULT 0
+);
 
-INSERT INTO `tbl_position` (`id`, `title`, `can_create`, `can_edit`, `can_delete`, `isDeleted`) VALUES
+-- --------------------------------------------------------
+-- Table structure for table tbl_name
+-- --------------------------------------------------------
+
+CREATE TABLE tbl_name (
+  id SERIAL PRIMARY KEY,
+  prefix VARCHAR(50) DEFAULT NULL,
+  first_name VARCHAR(50) DEFAULT NULL,
+  middle_name VARCHAR(50) DEFAULT NULL,
+  last_name VARCHAR(50) DEFAULT NULL,
+  suffix VARCHAR(50) DEFAULT NULL,
+  "isDeleted" SMALLINT NOT NULL DEFAULT 0,
+  CONSTRAINT uq_name_full UNIQUE (prefix, first_name, middle_name, last_name, suffix)
+);
+
+-- --------------------------------------------------------
+-- Table structure for table tbl_operator
+-- --------------------------------------------------------
+
+CREATE TABLE tbl_operator (
+  id SERIAL PRIMARY KEY,
+  name_id INTEGER DEFAULT -1,
+  address_id INTEGER NOT NULL DEFAULT -1,
+  image_id INTEGER NOT NULL DEFAULT -1,
+  sign_id INTEGER DEFAULT -1,
+  remarks VARCHAR(255) DEFAULT NULL,
+  date_of_birth DATE NOT NULL DEFAULT CURRENT_DATE,
+  contact_no VARCHAR(11) DEFAULT NULL,
+  emergency_person VARCHAR(255) DEFAULT NULL,
+  emergency_number VARCHAR(11) DEFAULT NULL,
+  "isOwner" SMALLINT NOT NULL DEFAULT 0,
+  "isDeleted" SMALLINT NOT NULL DEFAULT 0
+);
+
+-- --------------------------------------------------------
+-- Table structure for table tbl_payment_details
+-- --------------------------------------------------------
+
+CREATE TABLE tbl_payment_details (
+  id SERIAL PRIMARY KEY,
+  ledger_id INTEGER NOT NULL DEFAULT -1,
+  "isDownPayment" SMALLINT NOT NULL DEFAULT 0,
+  ledger_type INTEGER NOT NULL DEFAULT 0,
+  date DATE NOT NULL DEFAULT CURRENT_DATE,
+  reference_no INTEGER NOT NULL DEFAULT -1,
+  deposit DOUBLE PRECISION NOT NULL DEFAULT 0,
+  penalties DOUBLE PRECISION NOT NULL DEFAULT 0,
+  remarks VARCHAR(255) DEFAULT NULL,
+  "isDeleted" SMALLINT NOT NULL DEFAULT 0,
+  CONSTRAINT uq_payment_ref UNIQUE (reference_no)
+);
+
+-- --------------------------------------------------------
+-- Table structure for table tbl_position
+-- --------------------------------------------------------
+
+CREATE TABLE tbl_position (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(50) DEFAULT NULL,
+  can_create SMALLINT NOT NULL DEFAULT 0,
+  can_edit SMALLINT NOT NULL DEFAULT 0,
+  can_delete SMALLINT NOT NULL DEFAULT 0,
+  "isDeleted" SMALLINT NOT NULL DEFAULT 0
+);
+
+-- --------------------------------------------------------
+-- Seed data for tbl_position
+-- --------------------------------------------------------
+
+INSERT INTO tbl_position (id, title, can_create, can_edit, can_delete, "isDeleted") VALUES
 (1, 'General Manager', 1, 1, 1, 0),
 (2, 'Secretary', 0, 0, 0, 0),
 (3, 'Treasurer', 0, 0, 0, 0),
 (4, 'Book Keeper', 0, 0, 0, 0);
 
--- --------------------------------------------------------
-
---
--- Table structure for table `tbl_share_capital_ledger`
---
-
-CREATE TABLE `tbl_share_capital_ledger` (
-  `id` int(11) NOT NULL,
-  `franchise_id` int(11) NOT NULL DEFAULT -1,
-  `date` date NOT NULL DEFAULT current_timestamp(),
-  `beginning_balance` double NOT NULL DEFAULT 0,
-  `last_balance` double NOT NULL DEFAULT 0,
-  `isDeleted` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- Update sequence after manual inserts
+SELECT setval('tbl_position_id_seq', (SELECT MAX(id) FROM tbl_position));
 
 -- --------------------------------------------------------
-
---
--- Table structure for table `tbl_violation`
---
-
-CREATE TABLE `tbl_violation` (
-  `id` int(11) NOT NULL,
-  `franchise_id` int(11) NOT NULL DEFAULT -1,
-  `violation_level_count` int(11) NOT NULL DEFAULT 0,
-  `violation_type_id` int(11) NOT NULL DEFAULT -1,
-  `date` date NOT NULL DEFAULT current_timestamp(),
-  `suspension_start` date DEFAULT NULL,
-  `suspention_end` date DEFAULT NULL,
-  `remarks` varchar(255) DEFAULT NULL,
-  `name_id` int(11) NOT NULL DEFAULT -1,
-  `isDeleted` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
+-- Table structure for table tbl_share_capital_ledger
 -- --------------------------------------------------------
 
---
--- Table structure for table `tbl_violation_type`
---
+CREATE TABLE tbl_share_capital_ledger (
+  id SERIAL PRIMARY KEY,
+  franchise_id INTEGER NOT NULL DEFAULT -1,
+  date DATE NOT NULL DEFAULT CURRENT_DATE,
+  beginning_balance DOUBLE PRECISION NOT NULL DEFAULT 0,
+  last_balance DOUBLE PRECISION NOT NULL DEFAULT 0,
+  "isDeleted" SMALLINT NOT NULL DEFAULT 0
+);
 
-CREATE TABLE `tbl_violation_type` (
-  `id` int(11) NOT NULL,
-  `title` varchar(50) DEFAULT NULL,
-  `details` varchar(255) DEFAULT NULL,
-  `num_of_days` int(11) NOT NULL DEFAULT 0,
-  `is_for_driver` tinyint(1) NOT NULL DEFAULT 0,
-  `isDeleted` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- --------------------------------------------------------
+-- Table structure for table tbl_violation
+-- --------------------------------------------------------
 
---
--- Indexes for dumped tables
---
+CREATE TABLE tbl_violation (
+  id SERIAL PRIMARY KEY,
+  franchise_id INTEGER NOT NULL DEFAULT -1,
+  violation_level_count INTEGER NOT NULL DEFAULT 0,
+  violation_type_id INTEGER NOT NULL DEFAULT -1,
+  date DATE NOT NULL DEFAULT CURRENT_DATE,
+  suspension_start DATE DEFAULT NULL,
+  -- Note: original column was 'suspention_end' (typo) - corrected to 'suspension_end'
+  suspension_end DATE DEFAULT NULL,
+  remarks VARCHAR(255) DEFAULT NULL,
+  name_id INTEGER NOT NULL DEFAULT -1,
+  "isDeleted" SMALLINT NOT NULL DEFAULT 0
+);
 
---
--- Indexes for table `tbl_address`
---
-ALTER TABLE `tbl_address`
-  ADD PRIMARY KEY (`id`);
+-- --------------------------------------------------------
+-- Table structure for table tbl_violation_type
+-- --------------------------------------------------------
 
---
--- Indexes for table `tbl_driver`
---
-ALTER TABLE `tbl_driver`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `tbl_employee`
---
-ALTER TABLE `tbl_employee`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `tbl_franchise`
---
-ALTER TABLE `tbl_franchise`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `body_number` (`body_number`);
-
---
--- Indexes for table `tbl_id_history`
---
-ALTER TABLE `tbl_id_history`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `tbl_image`
---
-ALTER TABLE `tbl_image`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `image_name` (`image_name`);
-
---
--- Indexes for table `tbl_loan_ledger`
---
-ALTER TABLE `tbl_loan_ledger`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `tbl_long_term_loan_ledger`
---
-ALTER TABLE `tbl_long_term_loan_ledger`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `tbl_name`
---
-ALTER TABLE `tbl_name`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `prefix` (`prefix`,`first_name`,`middle_name`,`last_name`,`suffix`);
-
---
--- Indexes for table `tbl_operator`
---
-ALTER TABLE `tbl_operator`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `tbl_payment_details`
---
-ALTER TABLE `tbl_payment_details`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `ref` (`reference_no`);
-
---
--- Indexes for table `tbl_position`
---
-ALTER TABLE `tbl_position`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `tbl_share_capital_ledger`
---
-ALTER TABLE `tbl_share_capital_ledger`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `tbl_violation`
---
-ALTER TABLE `tbl_violation`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `tbl_violation_type`
---
-ALTER TABLE `tbl_violation_type`
-  ADD PRIMARY KEY (`id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `tbl_address`
---
-ALTER TABLE `tbl_address`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `tbl_driver`
---
-ALTER TABLE `tbl_driver`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `tbl_employee`
---
-ALTER TABLE `tbl_employee`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
-
---
--- AUTO_INCREMENT for table `tbl_franchise`
---
-ALTER TABLE `tbl_franchise`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `tbl_id_history`
---
-ALTER TABLE `tbl_id_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `tbl_image`
---
-ALTER TABLE `tbl_image`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `tbl_loan_ledger`
---
-ALTER TABLE `tbl_loan_ledger`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `tbl_long_term_loan_ledger`
---
-ALTER TABLE `tbl_long_term_loan_ledger`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `tbl_name`
---
-ALTER TABLE `tbl_name`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `tbl_operator`
---
-ALTER TABLE `tbl_operator`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `tbl_payment_details`
---
-ALTER TABLE `tbl_payment_details`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `tbl_position`
---
-ALTER TABLE `tbl_position`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT for table `tbl_share_capital_ledger`
---
-ALTER TABLE `tbl_share_capital_ledger`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `tbl_violation`
---
-ALTER TABLE `tbl_violation`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `tbl_violation_type`
---
-ALTER TABLE `tbl_violation_type`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+CREATE TABLE tbl_violation_type (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(50) DEFAULT NULL,
+  details VARCHAR(255) DEFAULT NULL,
+  num_of_days INTEGER NOT NULL DEFAULT 0,
+  is_for_driver SMALLINT NOT NULL DEFAULT 0,
+  "isDeleted" SMALLINT NOT NULL DEFAULT 0
+);

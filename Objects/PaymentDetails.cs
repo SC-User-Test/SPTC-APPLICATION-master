@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Linq;
-using MySql.Data.MySqlClient;
+using Npgsql;
 using SPTC_APPLICATION.Database;
 
 namespace SPTC_APPLICATION.Objects
@@ -58,7 +58,7 @@ namespace SPTC_APPLICATION.Objects
             paymentDetails = new Upsert(Table.PAYMENT_DETAILS, -1);
         }
 
-        public PaymentDetails(MySqlDataReader reader)
+        public PaymentDetails(NpgsqlDataReader reader)
         {
             paymentDetails = null;
             this.id = Retrieve.GetValueOrDefault<int>(reader, Field.ID);
@@ -77,8 +77,7 @@ namespace SPTC_APPLICATION.Objects
         {
             if (ledgerID >= 0)
             {
-
-                this.ledger = (Retrieve.GetData<T>(getLedgerType(), Select.ALL, Where.ID_, new MySqlParameter("id", ledgerID))).FirstOrDefault();
+                this.ledger = (Retrieve.GetData<T>(getLedgerType(), Select.ALL, Where.ID_, new NpgsqlParameter("id", ledgerID))).FirstOrDefault();
             }
         }
 

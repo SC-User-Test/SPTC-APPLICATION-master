@@ -1,4 +1,4 @@
-﻿using MySql.Data.MySqlClient;
+using Npgsql;
 using SPTC_APPLICATION.Database;
 using System;
 
@@ -24,7 +24,7 @@ namespace SPTC_APPLICATION.Objects
             violation = new Upsert(Table.VIOLATION, -1);
         }
 
-        public Violation(MySqlDataReader reader)
+        public Violation(NpgsqlDataReader reader)
         {
             this.id = Retrieve.GetValueOrDefault<int>(reader, Field.ID);
             this.franchiseId = Retrieve.GetValueOrDefault<int>(reader, Field.FRANCHISE_ID);

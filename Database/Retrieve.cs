@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using MySql.Data.MySqlClient;
+using Npgsql;
 using SPTC_APPLICATION.Objects;
 using SPTC_APPLICATION.View;
 
@@ -11,9 +11,9 @@ namespace SPTC_APPLICATION.Database
     /*
      all static class
     Login(username password) for Employees only
-    await Retrieve.GetData<object>() this is the main functionality of the Retrieve, it will retrieve from database whatever (tablename, selectquery, wherequery, mysqlparameters) inputted
+    await Retrieve.GetData<object>() this is the main functionality of the Retrieve, it will retrieve from database whatever (tablename, selectquery, wherequery, npgsqlparameters) inputted
     make sure that every <object> has the receiver constructor like this
-    public object(MySqlReader reader)
+    public object(NpgsqlDataReader reader)
     {
          //SET THE RESULT OF reader to each class attribute
     }
@@ -26,16 +26,16 @@ namespace SPTC_APPLICATION.Database
      */
     public class Retrieve
     {
-        private static Employee? ExecuteQueryAsync(string query, params MySqlParameter[] parameters)
+        private static Employee? ExecuteQueryAsync(string query, params NpgsqlParameter[] parameters)
         {
-            using (MySqlConnection connection = DatabaseConnection.GetConnection())
+            using (NpgsqlConnection connection = DatabaseConnection.GetConnection())
             {
                 connection.Open();
 
-                MySqlCommand command = new MySqlCommand(query, connection);
+                NpgsqlCommand command = new NpgsqlCommand(query, connection);
                 command.Parameters.AddRange(parameters);
 
-                using (MySqlDataReader reader = command.ExecuteReader())
+                using (NpgsqlDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
@@ -51,8 +51,8 @@ namespace SPTC_APPLICATION.Database
         {
             try
             {
-                MySqlParameter usernameParam = new MySqlParameter("titleParam", username);
-                MySqlParameter passwordParam = new MySqlParameter("passwordParam", RequestQuery.Protect(password));
+                NpgsqlParameter usernameParam = new NpgsqlParameter("titleParam", username);
+                NpgsqlParameter passwordParam = new NpgsqlParameter("passwordParam", RequestQuery.Protect(password));
 
                 Employee? employee = ExecuteQueryAsync(RequestQuery.LOGIN_EMPLOYEE, usernameParam, passwordParam);
                 if (employee != null)
@@ -64,29 +64,29 @@ namespace SPTC_APPLICATION.Database
                     return ControlWindow.ShowDialog("Wrong Password", "Username and Password not Match.", Icons.ERROR);
                 }
             }
-            catch (MySqlException ex)
+            catch (NpgsqlException ex)
             {
                 return ControlWindow.ShowDialog("TRY AGAIN", "Exception Occurred: \n" + ex.Message, Icons.ERROR);
             }
         }
 
-        public static List<T> GetData<T>(string tableName, string selectQuery, string whereQuery, params MySqlParameter[] parameters)
+        public static List<T> GetData<T>(string tableName, string selectQuery, string whereQuery, params NpgsqlParameter[] parameters)
         {
             Type type = typeof(T);
             ConstructorInfo? constructor = type.GetConstructor(Type.EmptyTypes);
             List<T> results = new List<T>();
             try
             {
-                using (MySqlConnection connection = DatabaseConnection.GetConnection())
+                using (NpgsqlConnection connection = DatabaseConnection.GetConnection())
                 {
                     connection.Open();
 
                     string query = $"SELECT {selectQuery} FROM {tableName} WHERE {whereQuery}";
 
-                    MySqlCommand command = new MySqlCommand(query, connection);
+                    NpgsqlCommand command = new NpgsqlCommand(query, connection);
                     command.Parameters.AddRange(parameters);
 
-                    using (MySqlDataReader reader = command.ExecuteReader())
+                    using (NpgsqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
@@ -110,7 +110,7 @@ namespace SPTC_APPLICATION.Database
                     return results;
                 }
             }
-            catch (MySqlException ex)
+            catch (NpgsqlException ex)
             {
                 EventLogger.Post($"DTB :: {ex.Message}");
 
@@ -130,10 +130,10 @@ namespace SPTC_APPLICATION.Database
             }
         }
 
-        private static T ReadData<T>(MySqlDataReader reader)
+        private static T ReadData<T>(NpgsqlDataReader reader)
         {
             Type type = typeof(T);
-            ConstructorInfo? readerConstructor = type.GetConstructor(new[] { typeof(MySqlDataReader) });
+            ConstructorInfo? readerConstructor = type.GetConstructor(new[] { typeof(NpgsqlDataReader) });
             ConstructorInfo? emptyConstructor = type.GetConstructor(Type.EmptyTypes);
 
             if (readerConstructor != null)
@@ -157,7 +157,7 @@ namespace SPTC_APPLICATION.Database
             return default(T)!;
         }
 
-        public static T GetValueOrDefault<T>(MySqlDataReader reader, string columnName)
+        public static T GetValueOrDefault<T>(NpgsqlDataReader reader, string columnName)
         {
             try
             {

@@ -1,8 +1,8 @@
-﻿using System.IO;
+using System.IO;
 using System.Linq;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using MySql.Data.MySqlClient;
+using Npgsql;
 using SPTC_APPLICATION.Database;
 
 namespace SPTC_APPLICATION.Objects
@@ -75,7 +75,7 @@ namespace SPTC_APPLICATION.Objects
             name = new Upsert("tbl_name", -1);
         }
 
-        public Name(MySqlDataReader reader)
+        public Name(NpgsqlDataReader reader)
         {
             name = null;
             this.id = Retrieve.GetValueOrDefault<int>(reader, Field.ID);
@@ -160,7 +160,7 @@ namespace SPTC_APPLICATION.Objects
             this.addressline2 = addressline2;
             address = new Upsert(Table.ADDRESS, -1);
         }
-        public Address(MySqlDataReader reader)
+        public Address(NpgsqlDataReader reader)
         {
             address = null;
             this.id = Retrieve.GetValueOrDefault<int>(reader, Field.ID);
@@ -255,7 +255,7 @@ namespace SPTC_APPLICATION.Objects
             image = new Upsert(Table.IMAGE, -1);
         }
 
-        public Image(MySqlDataReader reader)
+        public Image(NpgsqlDataReader reader)
         {
             image = null;
             this.id = Retrieve.GetValueOrDefault<int>(reader, Field.ID);
@@ -263,10 +263,8 @@ namespace SPTC_APPLICATION.Objects
             int imageOrdinal = reader.GetOrdinal(Field.IMAGE_SOURCE);
             if (!reader.IsDBNull(imageOrdinal))
             {
-                long byteLength = reader.GetBytes(imageOrdinal, 0, null, 0, 0);
-                byte[] buffer = new byte[byteLength];
-                reader.GetBytes(imageOrdinal, 0, buffer, 0, buffer.Length);
-                this.picture = buffer;
+                // PostgreSQL bytea: Npgsql returns byte[] directly via GetFieldValue
+                this.picture = reader.GetFieldValue<byte[]>(imageOrdinal);
             }
             else
             {
@@ -374,7 +372,7 @@ namespace SPTC_APPLICATION.Objects
             this.position = new Upsert(Table.POSITION, -1);
         }
 
-        public Position(MySqlDataReader reader)
+        public Position(NpgsqlDataReader reader)
         {
             this.id = Retrieve.GetValueOrDefault<int>(reader, Field.ID);
             this.title = Retrieve.GetValueOrDefault<string>(reader, Field.TITLE);
@@ -440,7 +438,7 @@ namespace SPTC_APPLICATION.Objects
             this.isForDriver = isForDriver;
         }
 
-        public ViolationType(MySqlDataReader reader)
+        public ViolationType(NpgsqlDataReader reader)
         {
             this.id = Retrieve.GetValueOrDefault<int>(reader, Field.ID);
             this.title = Retrieve.GetValueOrDefault<string>(reader, Field.TITLE);

@@ -7,9 +7,9 @@ namespace SPTC_APPLICATION.Database
 {
     public static class RequestQuery
     {
-        /* public static string LOGIN_EMPLOYEE = @"SELECT e.start_date, e.end_date, e.date_of_birth, e.contact_no, n.prefix, n.first_name, n.middle_name, n.last_name, n.suffix, a.house_no, a.street_name, a.barangay_subdivision, a.city_municipality, a.postal_code, a.province, a.country, p.title, p.can_create, p.can_edit, p.can_delete FROM tbl_employee e LEFT JOIN tbl_name n ON n.name_id = e.name_id LEFT JOIN tbl_address a ON a.address_id = e.address_id LEFT JOIN tbl_position p ON p.position_id = e.position_id WHERE p.title = ? AND e.password = ? AND e.isDeleted = 0";*/
-
-        public static string LOGIN_EMPLOYEE = "SELECT * FROM tbl_employee e LEFT JOIN tbl_position p ON p.id = e.position_id WHERE p.title = ? AND e.password = ? AND e.isDeleted = 0";
+        // PostgreSQL uses $1, $2 positional parameters OR named @param syntax with Npgsql
+        // Npgsql supports named parameters with @ prefix - updated from ? placeholders
+        public static string LOGIN_EMPLOYEE = "SELECT * FROM tbl_employee e LEFT JOIN tbl_position p ON p.id = e.position_id WHERE p.title = @titleParam AND e.password = @passwordParam AND e.\"isDeleted\" = 0";
 
         public static string GetEnumDescription(CRUDControl value)
         {
@@ -67,12 +67,12 @@ namespace SPTC_APPLICATION.Database
 
     public static class Where
     {
-        public static string ALL = "1";
-        public static string ALL_NOTDELETED = "isDeleted=0";
-        public static string ALL_DELETED = "isDeleted=1";
-        public static string ID_ = "id=?";
-        public static string ID_NOTDELETED = "id=? AND isDeleted=0";
-        public static string ID_DELETED = "id=? AND isDeleted=1";
+        public static string ALL = "1=1";
+        public static string ALL_NOTDELETED = "\"isDeleted\"=0";
+        public static string ALL_DELETED = "\"isDeleted\"=1";
+        public static string ID_ = "id=@id";
+        public static string ID_NOTDELETED = "id=@id AND \"isDeleted\"=0";
+        public static string ID_DELETED = "id=@id AND \"isDeleted\"=1";
     }
 
     public static class Field
